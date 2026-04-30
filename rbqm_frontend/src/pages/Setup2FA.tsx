@@ -5,7 +5,6 @@ import { useToast } from '../context/ToastContext';
 import { Activity, ShieldCheck, Copy, Check } from 'lucide-react';
 
 export function Setup2FA() {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const { addToast } = useToast();
   
@@ -17,35 +16,11 @@ export function Setup2FA() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // In a real implementation, we would fetch the QR code and secret from the backend here
-    // For now, we simulate an API call
-    const fetch2FASetup = async () => {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:8000'}/api/auth/2fa/setup`, {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('rbqm_token')}` // Temporary, ideally use httpOnly cookies and a specific endpoint
-          },
-        });
-        const data = await res.json();
-        if (res.ok && data.secret) {
-            setSecret(data.secret);
-            setQrCode(data.qr_code); // Expecting base64 image or svg
-        }
-      } catch (err) {
-        console.error("Failed to fetch 2FA setup");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
     // Simulate setup
     setTimeout(() => {
         setSecret('JBSWY3DPEHPK3PXP');
         setIsLoading(false);
     }, 1000);
-    // fetch2FASetup();
   }, []);
 
   const handleCopy = () => {

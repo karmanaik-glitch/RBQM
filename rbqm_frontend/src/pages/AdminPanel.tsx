@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useToast } from '../context/ToastContext';
 import { Shield, Users, Building, Link as LinkIcon, Database } from 'lucide-react';
 
 export function AdminPanel() {
   const { user } = useAuth();
-  const { addToast } = useToast();
   const [activeTab, setActiveTab] = useState('users');
 
   if (user?.role !== 'cro_admin' && user?.role !== 'platform_admin') {

@@ -1,6 +1,5 @@
 import { MapPin } from 'lucide-react'
 import type { SiteSummary } from '../types'
-import { RiskBadge } from './Badges'
 
 interface Props {
   sites: SiteSummary[]

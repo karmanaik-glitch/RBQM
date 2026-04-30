@@ -143,8 +143,8 @@ function DataNodes() {
       
       <lineSegments ref={connectionsRef}>
         <bufferGeometry>
-          <bufferAttribute attach="attributes-position" count={linePositions.length / 3} array={linePositions} itemSize={3} />
-          <bufferAttribute attach="attributes-color" count={lineColors.length / 3} array={lineColors} itemSize={3} />
+          <bufferAttribute attach="attributes-position" args={[linePositions, 3]} />
+          <bufferAttribute attach="attributes-color" args={[lineColors, 3]} />
         </bufferGeometry>
         <lineBasicMaterial vertexColors transparent opacity={0.3} />
       </lineSegments>

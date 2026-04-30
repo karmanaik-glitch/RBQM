@@ -97,7 +97,7 @@ export function CommandPalette() {
             groups.map(group => (
               <div key={group}>
                 <p className="text-[10px] font-bold text-foreground-subtle uppercase tracking-widest px-5 py-2">{group}</p>
-                {filtered.filter(i => i.group === group).map((item, idx) => {
+                {filtered.filter(i => i.group === group).map((item, _idx) => {
                   const globalIdx = filtered.indexOf(item)
                   return (
                     <button

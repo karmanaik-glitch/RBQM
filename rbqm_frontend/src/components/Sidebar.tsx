@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutGrid, FlaskConical, Bell, FileText, LogOut, ChevronRight, Wifi, WifiOff, Command, Sun, Moon, HelpCircle, Shield } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
+import { LayoutGrid, FlaskConical, Bell, FileText, LogOut, ChevronRight, Command, Sun, Moon, HelpCircle, Shield } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useTheme } from '../context/ThemeContext';
@@ -10,7 +10,6 @@ export function Sidebar() {
   const { user, logout } = useAuth();
   const { addToast } = useToast();
   const { theme, toggleTheme } = useTheme();
-  const navigate = useNavigate();
   const [alertCount, setAlertCount] = useState(0);
   const [apiOnline, setApiOnline] = useState(true);
 
