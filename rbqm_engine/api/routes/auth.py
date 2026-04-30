@@ -89,7 +89,7 @@ def login(request: Request, response: Response, form_data: OAuth2PasswordRequest
             # for simplicity we create a revoked session with the pre_token that gets activated, or a simple cache.
             # Using a simple cache or DB is needed. Let's just create a session but mark it special or use a JWT.
             # Actually, let's just use a special JWT.
-            import jwt
+            from jose import jwt
             from api.auth import SECRET_KEY, ALGORITHM
             payload = {"sub": actor.email, "type": "pre_token", "exp": datetime.now(timezone.utc) + timedelta(minutes=5)}
             encoded_pre = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
@@ -107,7 +107,7 @@ def login(request: Request, response: Response, form_data: OAuth2PasswordRequest
 
 @router.post("/2fa/verify")
 def verify_2fa(req: Verify2FARequest, response: Response, db: Session = Depends(get_db)):
-    import jwt
+    from jose import jwt
     from api.auth import SECRET_KEY, ALGORITHM
     try:
         payload = jwt.decode(req.pre_token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -153,7 +153,7 @@ def read_users_me(current_user = Depends(get_current_user)):
 def logout(request: Request, response: Response, db: Session = Depends(get_db)):
     token = request.cookies.get("rbqm_token")
     if token:
-        import jwt
+        from jose import jwt
         from api.auth import SECRET_KEY, ALGORITHM
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
