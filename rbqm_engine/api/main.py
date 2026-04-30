@@ -35,10 +35,21 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 import os
 
-origins = ["http://localhost:5173", "http://localhost:3000"]
+origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+]
+
 frontend_url = os.getenv("FRONTEND_URL")
 if frontend_url:
-    origins.append(frontend_url)
+    # Ensure no trailing slash and add variations
+    base_url = frontend_url.rstrip('/')
+    origins.append(base_url)
+    origins.append(f"{base_url}/")
+    
+# Log allowed origins for debugging in Render logs
+print(f"CORS Origins allowed: {origins}")
 
 app.add_middleware(
     CORSMiddleware,
