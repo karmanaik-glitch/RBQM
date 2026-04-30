@@ -1,0 +1,16 @@
+pandas
+numpy
+colorama
+scipy
+fastapi
+uvicorn
+python-multipart
+sqlalchemy
+psycopg2-binary
+python-dotenv
+supabase
+python-jose
+passlib
+groq
+reportlab
+resend

@@ -1,0 +1,6 @@
+site_id,site_name,country,target_enrollment
+SITE001,KEM Hospital Mumbai,India,40
+SITE002,AIIMS Delhi,India,40
+SITE003,Apollo Chennai,India,35
+SITE004,Sterling Ahmedabad,India,35
+SITE005,Ruby Hall Pune,India,30

@@ -1,0 +1,45 @@
+deviation_id,visit_id,patient_id,site_id,deviation_type,important
+DEV0001,V00007,PT0010,SITE001,Dose error,False
+DEV0002,V00062,PT0021,SITE001,Procedure timing,False
+DEV0003,V00097,PT0028,SITE001,Visit out of window,False
+DEV0004,V00101,PT0029,SITE001,Prohibited medication,False
+DEV0005,V00107,PT0030,SITE001,Missed assessment,False
+DEV0006,V00171,PT0043,SITE001,Procedure timing,True
+DEV0007,V00200,PT0059,SITE002,Prohibited medication,True
+DEV0008,V00220,PT0063,SITE002,Procedure timing,False
+DEV0009,V00240,PT0068,SITE002,Visit out of window,False
+DEV0010,V00242,PT0068,SITE002,Eligibility criteria,False
+DEV0011,V00255,PT0071,SITE002,Consent issue,False
+DEV0012,V00257,PT0071,SITE002,Procedure timing,False
+DEV0013,V00265,PT0073,SITE002,Procedure timing,False
+DEV0014,V00276,PT0075,SITE002,Eligibility criteria,False
+DEV0015,V00288,PT0078,SITE002,Procedure timing,True
+DEV0016,V00289,PT0078,SITE002,Visit out of window,False
+DEV0017,V00324,PT0085,SITE002,Missed assessment,False
+DEV0018,V00402,PT0110,SITE003,Missed assessment,False
+DEV0019,V00405,PT0110,SITE003,Eligibility criteria,False
+DEV0020,V00422,PT0113,SITE003,Dose error,False
+DEV0021,V00439,PT0117,SITE003,Procedure timing,False
+DEV0022,V00478,PT0125,SITE003,Procedure timing,False
+DEV0023,V00488,PT0127,SITE003,Prohibited medication,False
+DEV0024,V00495,PT0128,SITE003,Prohibited medication,True
+DEV0025,V00505,PT0138,SITE004,Prohibited medication,False
+DEV0026,V00558,PT0149,SITE004,Visit out of window,True
+DEV0027,V00559,PT0149,SITE004,Visit out of window,True
+DEV0028,V00564,PT0150,SITE004,Visit out of window,False
+DEV0029,V00633,PT0165,SITE004,Consent issue,False
+DEV0030,V00662,PT0189,SITE005,Eligibility criteria,True
+DEV0031,V00674,PT0192,SITE005,Missed assessment,True
+DEV0032,V00676,PT0192,SITE005,Consent issue,True
+DEV0033,V00684,PT0194,SITE005,Dose error,False
+DEV0034,V00688,PT0195,SITE005,Prohibited medication,False
+DEV0035,V00689,PT0195,SITE005,Missed assessment,False
+DEV0036,V00691,PT0195,SITE005,Consent issue,False
+DEV0037,V00695,PT0196,SITE005,Consent issue,False
+DEV0038,V00697,PT0196,SITE005,Missed assessment,True
+DEV0039,V00704,PT0198,SITE005,Consent issue,False
+DEV0040,V00706,PT0198,SITE005,Visit out of window,True
+DEV0041,V00707,PT0199,SITE005,Dose error,True
+DEV0042,V00714,PT0200,SITE005,Procedure timing,False
+DEV0043,V00717,PT0201,SITE005,Visit out of window,False
+DEV0044,V00718,PT0201,SITE005,Procedure timing,False

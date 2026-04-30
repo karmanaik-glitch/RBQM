@@ -1,0 +1,35 @@
+# Database
+*.db
+
+# Environment
+.env
+*.env.*
+!*.env.example
+
+# Uploads
+uploads/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Node.js
+node_modules/
+dist/
+.vite/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
