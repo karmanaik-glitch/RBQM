@@ -18,11 +18,10 @@ export default function Landing() {
   const handleTryDemo = async () => {
     setDemoLoading(true);
     try {
-      await login('demo@rbqm.com', 'demo1234');
+      await login('admin@acmecro.com', 'Password123!');
       navigate('/dashboard');
     } catch {
-      // If demo user doesn't exist, redirect to register
-      navigate('/register');
+      navigate('/login');
     } finally {
       setDemoLoading(false);
     }
@@ -83,7 +82,7 @@ export default function Landing() {
               Log In
             </button>
             <button 
-              onClick={() => navigate('/register')}
+              onClick={() => navigate('/login')}
               className="px-6 py-2.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-sm font-bold transition-all shadow-lg shadow-emerald-500/20"
             >
               Get Started
@@ -143,17 +142,17 @@ export default function Landing() {
               )}
             </button>
             <button 
-              onClick={() => navigate('/register')}
+              onClick={() => navigate('/login')}
               className="w-full sm:w-auto px-8 py-4 rounded-xl bg-slate-900/50 border border-slate-800 hover:bg-slate-800/50 text-white font-bold transition-all flex items-center justify-center gap-2 backdrop-blur-sm"
             >
-              Create Account
+              Login
             </button>
           </motion.div>
           <motion.p 
             variants={itemVariants}
             className="text-xs text-slate-600 mt-4 font-mono"
           >
-            Demo: demo@rbqm.com / demo1234 — Pre-loaded with 5 sites and KRI data
+            Demo: admin@acmecro.com / Password123! — Pre-loaded with sites and KRI data
           </motion.p>
 
           {/* Dashboard Preview */}
@@ -303,10 +302,10 @@ export default function Landing() {
           <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight relative z-10">Ready to modernize your monitoring?</h2>
           <p className="text-slate-900/80 font-medium text-lg mb-10 relative z-10">Join leading CROs and sponsors using Vritas RBQM.</p>
           <button 
-            onClick={() => navigate('/register')}
+            onClick={() => navigate('/login')}
             className="px-10 py-5 bg-slate-900 text-white font-black text-xl rounded-2xl hover:scale-105 transition-all shadow-2xl relative z-10"
           >
-            Create Your Account
+            Go to Login
           </button>
         </motion.div>
       </section>
