@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Activity, ShieldCheck, Copy, Check } from 'lucide-react';
 
@@ -8,7 +7,7 @@ export function Setup2FA() {
   const navigate = useNavigate();
   const { addToast } = useToast();
   
-  const [qrCode, setQrCode] = useState('');
+  const [qrCode] = useState('');
   const [secret, setSecret] = useState('');
   const [token, setToken] = useState('');
   const [error, setError] = useState('');
