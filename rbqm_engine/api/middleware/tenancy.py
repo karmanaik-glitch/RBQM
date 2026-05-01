@@ -15,13 +15,15 @@ PUBLIC_PATHS = [
     "/openapi.json"
 ]
 
-class TenancyMiddleware:
+from starlette.middleware.base import BaseHTTPMiddleware
+
+class TenancyMiddleware(BaseHTTPMiddleware):
     """
     Injects the current user's org_id into every request state.
     Sets Postgres session variables for RLS.
     All subsequent DB queries MUST filter by request.state.org_id.
     """
-    async def __call__(self, request: Request, call_next):
+    async def dispatch(self, request: Request, call_next):
         token = request.cookies.get("rbqm_token")
         
         if token and request.url.path not in PUBLIC_PATHS:
