@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useTheme } from '../context/ThemeContext';
 import { resetOnboarding } from './OnboardingTour';
+import { VritasLogo } from './VritasLogo';
 
 export function Sidebar() {
   const { user, logout } = useAuth();
@@ -17,7 +18,7 @@ export function Sidebar() {
   useEffect(() => {
     const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
     const token = localStorage.getItem('rbqm_token');
-    
+
     const checkAlerts = () => {
       fetch(`${BASE_URL}/api/kri/alerts`, {
         headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
@@ -50,11 +51,8 @@ export function Sidebar() {
 
   return (
     <aside className="w-64 bg-background-deep border-r border-border-default flex flex-col h-screen sticky top-0 z-50">
-      <div className="p-8 flex items-center gap-3">
-        <div className="w-8 h-8 rounded-xl bg-accent flex items-center justify-center shadow-accent-glow">
-          <span className="text-white font-bold text-lg">R</span>
-        </div>
-        <span className="text-gradient font-semibold tracking-tight text-xl uppercase">Vritas</span>
+      <div className="p-8">
+        <VritasLogo variant="full" />
       </div>
 
       <nav className="flex-1 px-4 space-y-1 mt-4">
@@ -63,10 +61,9 @@ export function Sidebar() {
             key={item.to}
             to={item.to}
             className={({ isActive }) =>
-              `flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${
-                isActive
-                  ? 'bg-white/[0.05] text-foreground border-l-2 border-accent shadow-inner-highlight'
-                  : 'text-foreground-muted hover:bg-white/[0.03] hover:text-foreground'
+              `flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${isActive
+                ? 'bg-white/[0.05] text-foreground border-l-2 border-accent shadow-inner-highlight'
+                : 'text-foreground-muted hover:bg-white/[0.03] hover:text-foreground'
               }`
             }
           >
@@ -121,7 +118,7 @@ export function Sidebar() {
             <div className={`w-2 h-2 rounded-full ${apiOnline ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}`} />
             {apiOnline ? 'API Connected' : 'API Offline'}
           </div>
-          
+
           <div className="bg-white/[0.03] border border-border-default rounded-2xl p-4 flex items-center justify-between group shadow-inner-highlight">
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-9 h-9 rounded-xl bg-background-elevated border border-border-default flex items-center justify-center text-foreground-muted text-xs font-bold uppercase ring-1 ring-white/5">

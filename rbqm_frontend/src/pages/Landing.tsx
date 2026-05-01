@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import HeroScene from '../components/3d/HeroScene';
 
+import { VritasLogo } from '../components/VritasLogo';
+
 export default function Landing() {
   const navigate = useNavigate();
   const { login, isAuthenticated } = useAuth();
@@ -60,28 +62,22 @@ export default function Landing() {
             animate={{ x: 0, opacity: 1 }}
             className="flex items-center gap-3"
           >
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <Shield className="text-slate-900" size={24} />
-            </div>
-            <div>
-              <span className="text-xl font-bold tracking-tight text-white block leading-none">Vritas RBQM</span>
-              <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">ICH E6 R3 Compliant</span>
-            </div>
+            <VritasLogo variant="full" />
           </motion.div>
-          <motion.div 
+          <motion.div
             initial={{ x: 20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             className="hidden md:flex items-center gap-8"
           >
             <a href="#features" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Features</a>
             <a href="#compliance" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Compliance</a>
-            <button 
+            <button
               onClick={() => navigate('/login')}
               className="px-6 py-2.5 rounded-full bg-slate-800/50 hover:bg-slate-700/50 text-white text-sm font-bold transition-all border border-slate-700 backdrop-blur-sm"
             >
               Log In
             </button>
-            <button 
+            <button
               onClick={() => navigate('/login')}
               className="px-6 py-2.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-sm font-bold transition-all shadow-lg shadow-emerald-500/20"
             >
@@ -93,38 +89,38 @@ export default function Landing() {
 
       {/* Hero */}
       <section className="relative z-10 pt-32 pb-24 px-6">
-        <motion.div 
+        <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
           className="max-w-7xl mx-auto text-center"
         >
-          <motion.div 
+          <motion.div
             variants={itemVariants}
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-widest mb-8"
           >
             <Zap size={14} className="animate-pulse" /> Next-Gen Clinical Monitoring
           </motion.div>
-          <motion.h1 
+          <motion.h1
             variants={itemVariants}
             className="text-6xl md:text-8xl font-black tracking-tighter text-gradient mb-8 leading-[0.9]"
           >
             Risk-Based Quality <br />
             <span className="text-accent-gradient">Management.</span>
           </motion.h1>
-          <motion.p 
+          <motion.p
             variants={itemVariants}
             className="max-w-2xl mx-auto text-slate-400 text-lg md:text-xl leading-relaxed mb-12"
           >
-            The industry's first fully ICH E6 R3 aligned monitoring tool. 
-            Automate KRI calculations, detect site fraud with AI, and maintain 
+            The industry's first fully ICH E6 R3 aligned monitoring tool.
+            Automate KRI calculations, detect site fraud with AI, and maintain
             perfect regulatory alignment throughout your trial.
           </motion.p>
-          <motion.div 
+          <motion.div
             variants={itemVariants}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <button 
+            <button
               onClick={handleTryDemo}
               disabled={demoLoading}
               className="w-full sm:w-auto px-8 py-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black text-lg transition-all shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
@@ -141,14 +137,14 @@ export default function Landing() {
                 </>
               )}
             </button>
-            <button 
+            <button
               onClick={() => navigate('/login')}
               className="w-full sm:w-auto px-8 py-4 rounded-xl bg-slate-900/50 border border-slate-800 hover:bg-slate-800/50 text-white font-bold transition-all flex items-center justify-center gap-2 backdrop-blur-sm"
             >
               Login
             </button>
           </motion.div>
-          <motion.p 
+          <motion.p
             variants={itemVariants}
             className="text-xs text-slate-600 mt-4 font-mono"
           >
@@ -156,7 +152,7 @@ export default function Landing() {
           </motion.p>
 
           {/* Dashboard Preview */}
-          <motion.div 
+          <motion.div
             initial={{ scale: 0.9, opacity: 0, y: 40 }}
             whileInView={{ scale: 1, opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -201,7 +197,7 @@ export default function Landing() {
       <section id="features" className="relative z-10 py-32 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-24">
-            <motion.h2 
+            <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -209,7 +205,7 @@ export default function Landing() {
             >
               Engineered for Accuracy.
             </motion.h2>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
@@ -219,19 +215,19 @@ export default function Landing() {
             </motion.p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <FeatureCard 
+            <FeatureCard
               icon={Activity}
               title="Real-time KRI Engine"
               desc="Instant analysis of EDC data across 20+ Key Risk Indicators with threshold-based alerting."
               index={0}
             />
-            <FeatureCard 
+            <FeatureCard
               icon={Database}
               title="Centralized Monitoring"
               desc="Advanced statistical detection of data outliers, digit preference, and intra-site variability."
               index={1}
             />
-            <FeatureCard 
+            <FeatureCard
               icon={FileText}
               title="AI Narrative Reporting"
               desc="LLM-driven clinical narratives that turn raw data into audit-ready monitoring reports."
@@ -244,7 +240,7 @@ export default function Landing() {
       {/* Compliance */}
       <section id="compliance" className="relative z-10 py-32 px-6 bg-slate-900/20 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-20">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -261,7 +257,7 @@ export default function Landing() {
               <ComplianceItem text="Appendix C: Proportionality in Clinical Monitoring" />
             </div>
           </motion.div>
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -272,7 +268,7 @@ export default function Landing() {
             </div>
             <div className="space-y-4">
               <div className="h-4 w-3/4 bg-slate-700/30 rounded-full overflow-hidden relative">
-                <motion.div 
+                <motion.div
                   initial={{ x: '-100%' }}
                   animate={{ x: '100%' }}
                   transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}
@@ -292,7 +288,7 @@ export default function Landing() {
 
       {/* CTA */}
       <section className="relative z-10 py-32 px-6 text-center">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -301,7 +297,7 @@ export default function Landing() {
           <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
           <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight relative z-10">Ready to modernize your monitoring?</h2>
           <p className="text-slate-900/80 font-medium text-lg mb-10 relative z-10">Join leading CROs and sponsors using Vritas RBQM.</p>
-          <button 
+          <button
             onClick={() => navigate('/login')}
             className="px-10 py-5 bg-slate-900 text-white font-black text-xl rounded-2xl hover:scale-105 transition-all shadow-2xl relative z-10"
           >
@@ -337,7 +333,7 @@ export default function Landing() {
 
 function StatItem({ label, value }: { label: string; value: string }) {
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
@@ -351,7 +347,7 @@ function StatItem({ label, value }: { label: string; value: string }) {
 
 function FeatureCard({ icon: Icon, title, desc, index }: { icon: typeof Activity; title: string; desc: string; index: number }) {
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -371,7 +367,7 @@ function FeatureCard({ icon: Icon, title, desc, index }: { icon: typeof Activity
 
 function ComplianceItem({ text }: { text: string }) {
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, x: -20 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}

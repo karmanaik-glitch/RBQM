@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { Activity } from 'lucide-react';
+import { VritasLogo } from '../components/VritasLogo';
 
 export function Login() {
   const [email, setEmail] = useState('');
@@ -27,10 +27,7 @@ export function Login() {
   return (
     <div className="min-h-screen bg-[#0f1117] flex flex-col justify-center items-center p-4">
       <Link to="/" className="mb-8 flex items-center space-x-3 hover:opacity-80 transition-opacity">
-        <div className="w-10 h-10 rounded-lg bg-emerald-900/50 border border-emerald-800 flex items-center justify-center">
-          <Activity className="w-6 h-6 text-emerald-400" />
-        </div>
-        <h1 className="text-2xl font-bold text-slate-100">Vritas RBQM</h1>
+        <VritasLogo variant="full" />
       </Link>
       
       <div className="w-full max-w-md bg-slate-800/60 border border-slate-700 rounded-xl overflow-hidden">
