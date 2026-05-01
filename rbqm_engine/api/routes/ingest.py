@@ -37,7 +37,7 @@ async def upload_file(id: int, request: Request, file: UploadFile = File(...), d
         upload.file_path = file_path
     db.commit()
     db.commit()
-    log_event(db, "UPLOAD", str(current_user_email), f"Uploaded file {file.filename} for trial {t.trial_id}", trial_id=id)
+    log_event(db, "UPLOAD", f"Uploaded file {file.filename} for trial {t.trial_id}", org_id=request.state.org_id, study_id=id, actor_id=request.state.user_id)
     return {"message": "File uploaded", "filename": file.filename}
 
 @router.get("/{id}/uploads")
@@ -124,5 +124,5 @@ def run_kri(id: int, request: Request, db: Session = Depends(get_db)):
                 greens += 1
     db.commit()
     db.commit()
-    log_event(db, "KRI_RUN", str(current_user_email), f"KRI Engine run completed. Summary: {reds} Red, {yellows} Yellow, {greens} Green", trial_id=id)
+    log_event(db, "KRI_RUN", f"KRI Engine run completed. Summary: {reds} Red, {yellows} Yellow, {greens} Green", org_id=request.state.org_id, study_id=id, actor_id=request.state.user_id)
     return {"message": "KRI run completed", "summary": {"RED": reds, "YELLOW": yellows, "GREEN": greens}}

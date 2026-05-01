@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./rbqm.db")
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 # For sqlite we need check_same_thread=False, but for postgres we don't.
 connect_args = {}

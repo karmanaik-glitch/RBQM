@@ -62,7 +62,7 @@ def update_alert(id: int, req: dict, request: Request, db: Session = Depends(get
     db.commit()
     
     current_user_email = request.state.user_email if hasattr(request.state, "user_email") else request.state.user_id
-    log_event(db, "ALERT_UPDATED", str(current_user_email), f"Alert {id} (KRI {alert.kri_id}) status updated to {alert.status}", trial_id=alert.trial_id)
+    log_event(db, "ALERT_UPDATED", f"Alert {id} (KRI {alert.kri_id}) status updated to {alert.status}", org_id=request.state.org_id, study_id=alert.trial_id, actor_id=request.state.user_id)
     return alert
 
 class ActionItemCreate(BaseModel):
@@ -89,7 +89,7 @@ def create_action_item(id: int, req: ActionItemCreate, request: Request, db: Ses
     db.add(item)
     db.commit()
     current_user_email = request.state.user_email if hasattr(request.state, "user_email") else request.state.user_id
-    log_event(db, "ACTION_CREATED", str(current_user_email), f"Action item created for alert {id}: {req.title}", trial_id=alert.trial_id)
+    log_event(db, "ACTION_CREATED", f"Action item created for alert {id}: {req.title}", org_id=request.state.org_id, study_id=alert.trial_id, actor_id=request.state.user_id)
     return item
 
 @router.get("/alert/{id}/items")
@@ -114,7 +114,7 @@ def update_action_item(id: int, req: dict, request: Request, db: Session = Depen
     db.commit()
     
     current_user_email = request.state.user_email if hasattr(request.state, "user_email") else request.state.user_id
-    log_event(db, "ACTION_UPDATED", str(current_user_email), f"Action item {id} status updated to {item.status}", trial_id=alert.trial_id if alert else None)
+    log_event(db, "ACTION_UPDATED", f"Action item {id} status updated to {item.status}", org_id=request.state.org_id, study_id=alert.trial_id if alert else None, actor_id=request.state.user_id)
     return item
 
 @router.get("/audit-log")
@@ -128,7 +128,7 @@ def get_audit_log(request: Request, db: Session = Depends(get_db)):
         # Ideally, AuditLog should have org_id. Assuming log_event uses trial_id.
         trials = db.query(Trial).filter(Trial.org_id == request.state.org_id).all()
         trial_ids = [t.id for t in trials]
-        return db.query(AuditLog).filter(AuditLog.trial_id.in_(trial_ids)).order_by(AuditLog.created_at.desc()).all()
+        return db.query(AuditLog).filter(AuditLog.study_id.in_(trial_ids)).order_by(AuditLog.created_at.desc()).all()
 
 @router.get("/my-items")
 def get_my_items(request: Request, db: Session = Depends(get_db)):
@@ -163,7 +163,7 @@ def add_comment(req: CommentCreate, request: Request, db: Session = Depends(get_
             alert = db.query(Alert).filter(Alert.id == item.alert_id).first()
             if alert: trial_id = alert.trial_id
 
-    log_event(db, "COMMENT_ADDED", str(current_user_email), detail, trial_id=trial_id)
+    log_event(db, "COMMENT_ADDED", detail, org_id=request.state.org_id, study_id=trial_id, actor_id=request.state.user_id)
     return comment
 
 @router.get("/alert/{id}/comments")

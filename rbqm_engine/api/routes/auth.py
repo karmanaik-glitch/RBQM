@@ -99,7 +99,7 @@ def login(request: Request, response: Response, form_data: OAuth2PasswordRequest
     # Issue full token if no 2FA or not required
     token = create_access_token(actor, db)
     set_auth_cookie(response, token)
-    log_event(db, "LOGIN", actor.email, "User logged in successfully")
+    log_event(db, "LOGIN", "User logged in successfully", org_id=org_id, actor_id=actor.id)
     
     org_id = actor.org_id if hasattr(actor, "org_id") else None
     
@@ -209,7 +209,7 @@ def accept_invite(request: Request, response: Response, req: AcceptInviteRequest
     db.commit()
     db.refresh(user)
     
-    log_event(db, "USER_REGISTERED", user.email, f"User accepted invite for org {invite.org_id}")
+    log_event(db, "USER_REGISTERED", f"User accepted invite for org {invite.org_id}", org_id=invite.org_id, actor_id=user.id)
     
     token = create_access_token(user, db)
     set_auth_cookie(response, token)
@@ -261,7 +261,7 @@ def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db)):
     })
     
     db.commit()
-    log_event(db, "PASSWORD_RESET", user.email, "User reset their password")
+    log_event(db, "PASSWORD_RESET", "User reset their password", actor_id=user.id)
     
     return {"message": "Password reset successfully"}
 

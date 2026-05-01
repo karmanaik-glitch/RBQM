@@ -61,7 +61,7 @@ def invite_user(request: Request, req: InviteUserRequest, db: Session = Depends(
     db.add(invite)
     db.commit()
     
-    log_event(db, "INVITATION_SENT", req.email, f"Invited with role {req.role}")
+    log_event(db, "INVITATION_SENT", f"Invited {req.email} with role {req.role}", org_id=org_id, actor_id=user_id)
     
     invite_link = f"{os.getenv('INVITE_BASE_URL')}/accept-invite?token={token}"
     org_name = request.state.org_name if hasattr(request.state, "org_name") else "Our Organisation"
