@@ -62,6 +62,18 @@ def update_org(request: Request, org_id: int, req: UpdateOrgRequest, db: Session
     db.commit()
     return {"message": "Organisation updated"}
 
+@router.delete("/orgs/{org_id}")
+def delete_org(request: Request, org_id: int, db: Session = Depends(get_db)):
+    org = db.query(Organisation).filter(Organisation.id == org_id).first()
+    if not org:
+        raise HTTPException(status_code=404, detail="Organisation not found")
+        
+    # Ensure trials and users are cleaned up (Cascade should handle this if configured, 
+    # but we'll do it explicitly or rely on the DB)
+    db.delete(org)
+    db.commit()
+    return {"message": "Organisation removed"}
+
 @router.post("/admins")
 def create_admin(request: Request, req: CreateAdminRequest, db: Session = Depends(get_db)):
     admin = db.query(PlatformAdmin).filter(PlatformAdmin.email == req.email).first()

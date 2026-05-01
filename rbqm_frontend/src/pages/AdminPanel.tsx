@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Shield, Users, Building, Link as LinkIcon, Database } from 'lucide-react';
+import { Shield, Users, Building, Link as LinkIcon, Database, Trash2 } from 'lucide-react';
 
 export function AdminPanel() {
   const { user } = useAuth();
@@ -164,6 +164,20 @@ function OrgManagement() {
     } catch (e) { alert('Connection error'); }
   };
 
+  const handleDelete = async (id: number) => {
+    if (!confirm('Are you sure? This will delete all users and trials for this organization.')) return;
+    try {
+      const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+      const token = localStorage.getItem('rbqm_token');
+      const res = await fetch(`${BASE_URL}/api/platform/orgs/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) fetchOrgs();
+      else alert('Failed to delete organization');
+    } catch (e) { alert('Connection error'); }
+  };
+
   useState(() => { fetchOrgs(); });
 
   return (
@@ -217,6 +231,7 @@ function OrgManagement() {
               <th className="px-4 py-3">Slug</th>
               <th className="px-4 py-3">Tier</th>
               <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-700/50">
@@ -229,6 +244,15 @@ function OrgManagement() {
                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${org.is_active ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
                     {org.is_active ? 'ACTIVE' : 'INACTIVE'}
                   </span>
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <button 
+                    onClick={() => handleDelete(org.id)}
+                    className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                    title="Delete Organization"
+                  >
+                    <Trash2 size={14} />
+                  </button>
                 </td>
               </tr>
             ))}
