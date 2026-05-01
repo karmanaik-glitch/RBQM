@@ -110,7 +110,7 @@ def login(request: Request, response: Response, form_data: OAuth2PasswordRequest
 
 
 @router.post("/2fa/verify")
-def verify_2fa(req: Verify2FARequest, response: Response, db: Session = Depends(get_db)):
+def verify_2fa(request: Request, req: Verify2FARequest, response: Response, db: Session = Depends(get_db)):
     from jose import jwt
     from api.auth import SECRET_KEY, ALGORITHM
     try:
