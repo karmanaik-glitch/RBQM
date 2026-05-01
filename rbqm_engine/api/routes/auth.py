@@ -143,9 +143,11 @@ def verify_2fa(req: Verify2FARequest, response: Response, db: Session = Depends(
 
 @router.get("/me")
 def read_users_me(current_user = Depends(get_current_user)):
-    org_id = current_user.org_id if hasattr(current_user, "org_id") else None
-    org_name = current_user.organisation.name if org_id and current_user.organisation else None
-    role = current_user.role if hasattr(current_user, "role") else "platform_admin"
+    org_id = getattr(current_user, "org_id", None)
+    org_name = None
+    if org_id and hasattr(current_user, "organisation") and current_user.organisation:
+        org_name = current_user.organisation.name
+    role = getattr(current_user, "role", "platform_admin")
     
     return {
         "id": current_user.id,
@@ -160,6 +162,11 @@ def read_users_me(current_user = Depends(get_current_user)):
 @router.post("/logout")
 def logout(request: Request, response: Response, db: Session = Depends(get_db)):
     token = request.cookies.get("rbqm_token")
+    if not token:
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.split(" ")[1]
+            
     if token:
         from jose import jwt
         from api.auth import SECRET_KEY, ALGORITHM

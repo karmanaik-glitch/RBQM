@@ -111,4 +111,10 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
         print(f"AUTH ERROR: User not found for session {jti}")
         raise credentials_exception
         
+    # Normalize PlatformAdmin for downstream role/tenancy checks
+    if not hasattr(user, "role"):
+        user.role = "platform_admin"
+    if not hasattr(user, "org_id"):
+        user.org_id = None
+        
     return user

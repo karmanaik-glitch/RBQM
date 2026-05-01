@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 from db.database import SessionLocal, init_db, engine, Base
 from db.models import (
     Organisation, User, PlatformAdmin, Trial, Site, 
-    UserSiteAssignment, KRILibrary, StudyTeamMember
+    UserSiteAssignment, KRILibrary, StudyTeamMember,
+    AuditLog, Session as DBSession
 )
 from api.auth import get_password_hash
 
@@ -18,6 +19,7 @@ def seed_db():
         # Use a list of tables in reverse dependency order
         tables = [
             UserSiteAssignment, StudyTeamMember, KRILibrary, 
+            AuditLog, DBSession,
             Site, Trial, User, Organisation, PlatformAdmin
         ]
         for table in tables:
@@ -113,22 +115,24 @@ def seed_db():
 
         print("Seeding Sites...")
         sites = [
-            Site(site_id="US-101", site_name="Boston General", country="USA", target_enrollment=50, trial_id=trial.id),
-            Site(site_id="US-102", site_name="NY Presbyterian", country="USA", target_enrollment=40, trial_id=trial.id),
-            Site(site_id="EU-201", site_name="London Clinic", country="UK", target_enrollment=30, trial_id=trial.id),
-            Site(site_id="EU-202", site_name="Berlin Charité", country="DE", target_enrollment=35, trial_id=trial.id),
+            Site(site_id="SITE001", site_name="KEM Hospital Mumbai", country="India", target_enrollment=40, trial_id=trial.id),
+            Site(site_id="SITE002", site_name="AIIMS Delhi", country="India", target_enrollment=40, trial_id=trial.id),
+            Site(site_id="SITE003", site_name="Apollo Chennai", country="India", target_enrollment=35, trial_id=trial.id),
+            Site(site_id="SITE004", site_name="Sterling Ahmedabad", country="India", target_enrollment=35, trial_id=trial.id),
+            Site(site_id="SITE005", site_name="Ruby Hall Pune", country="India", target_enrollment=30, trial_id=trial.id),
         ]
         db.add_all(sites)
         db.commit()
 
         print("Assigning Monitors to Sites...")
-        # Charlie -> US sites
+        # Charlie -> Sites 1, 2, 3
         db.add(UserSiteAssignment(user_id=site_monitor1.id, site_id=sites[0].id, study_id=trial.id))
         db.add(UserSiteAssignment(user_id=site_monitor1.id, site_id=sites[1].id, study_id=trial.id))
+        db.add(UserSiteAssignment(user_id=site_monitor1.id, site_id=sites[2].id, study_id=trial.id))
         
-        # Dave -> EU sites
-        db.add(UserSiteAssignment(user_id=site_monitor2.id, site_id=sites[2].id, study_id=trial.id))
+        # Dave -> Sites 4, 5
         db.add(UserSiteAssignment(user_id=site_monitor2.id, site_id=sites[3].id, study_id=trial.id))
+        db.add(UserSiteAssignment(user_id=site_monitor2.id, site_id=sites[4].id, study_id=trial.id))
         db.commit()
 
         print("Assigning Team Members to Study...")
