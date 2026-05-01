@@ -42,10 +42,12 @@ class StudyTeamAssignRequest(BaseModel):
 def invite_user(request: Request, req: InviteUserRequest, db: Session = Depends(get_db)):
     role = getattr(request.state, "role", None)
     
-    # Platform Admin can specify org_id, others use their own
+    # Platform Admin can specify org_id, but ONLY invite CRO Admins
     if role == "platform_admin":
         if not req.org_id:
             raise HTTPException(status_code=400, detail="Platform Admin must specify org_id for invitations")
+        if req.role != "cro_admin":
+            raise HTTPException(status_code=400, detail="Platform Admin can only invite CRO Admins")
         org_id = req.org_id
     else:
         org_id = request.state.org_id
