@@ -69,12 +69,17 @@ def invite_user(request: Request, req: InviteUserRequest, db: Session = Depends(
             
         expires_at = datetime.now(timezone.utc) + timedelta(hours=expiry_hours)
         
+        # Detect sender identity
+        inviter_user_id = user_id if role != "platform_admin" else None
+        inviter_admin_id = user_id if role == "platform_admin" else None
+        
         invite = Invitation(
             org_id=org_id,
             invited_email=req.email,
             role=req.role,
             token=token,
-            invited_by=user_id,
+            invited_by=inviter_user_id,
+            platform_admin_id=inviter_admin_id,
             expires_at=expires_at
         )
         db.add(invite)

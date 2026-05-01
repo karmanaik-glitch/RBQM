@@ -181,13 +181,15 @@ class Invitation(Base):
     invited_email = Column(String(200), nullable=False)
     role = Column(String(50), nullable=False)
     token = Column(String(200), unique=True, nullable=False)
-    invited_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+    invited_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    platform_admin_id = Column(Integer, ForeignKey("platform_admins.id"), nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     expires_at = Column(DateTime, nullable=False)
     accepted_at = Column(DateTime)
     is_used = Column(Boolean, default=False)
 
     inviter = relationship("User", back_populates="invitations_sent", foreign_keys=[invited_by])
+    platform_inviter = relationship("PlatformAdmin", foreign_keys=[platform_admin_id])
     organisation = relationship("Organisation")
 
 class PlatformAdmin(Base):
@@ -221,7 +223,8 @@ class Session(Base):
 class PasswordResetToken(Base):
     __tablename__ = "password_reset_tokens"
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
+    platform_admin_id = Column(Integer, ForeignKey("platform_admins.id", ondelete="CASCADE"), nullable=True)
     token = Column(String(200), unique=True, nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     expires_at = Column(DateTime, nullable=False)

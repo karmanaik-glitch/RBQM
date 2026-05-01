@@ -97,7 +97,7 @@ def login(request: Request, response: Response, form_data: OAuth2PasswordRequest
             return {"requires_2fa": True, "pre_token": encoded_pre}
 
     # Issue full token if no 2FA or not required
-    token = create_access_token(actor, db)
+    token = create_access_token(actor, db, request)
     set_auth_cookie(response, token)
     org_id = actor.org_id if hasattr(actor, "org_id") else None
     log_event(db, "LOGIN", "User logged in successfully", org_id=org_id, actor_id=actor.id)
@@ -133,7 +133,7 @@ def verify_2fa(req: Verify2FARequest, response: Response, db: Session = Depends(
     if not totp_obj.verify(req.totp_code):
         raise HTTPException(status_code=400, detail="Invalid 2FA code")
         
-    token = create_access_token(user, db)
+    token = create_access_token(user, db, request)
     set_auth_cookie(response, token)
     return {
         "message": "2FA verified", 
@@ -225,7 +225,7 @@ def accept_invite(request: Request, response: Response, req: AcceptInviteRequest
     
     log_event(db, "USER_REGISTERED", f"User accepted invite for org {invite.org_id}", org_id=invite.org_id, actor_id=user.id)
     
-    token = create_access_token(user, db)
+    token = create_access_token(user, db, request)
     set_auth_cookie(response, token)
     return {"user": {"id": user.id, "email": user.email, "role": user.role}}
 
@@ -233,13 +233,24 @@ def accept_invite(request: Request, response: Response, req: AcceptInviteRequest
 @limiter.limit("3/minute")
 def forgot_password(request: Request, req: ForgotPasswordRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == req.email).first()
-    if user:
-        # Invalidate previous tokens
-        db.query(PasswordResetToken).filter(PasswordResetToken.user_id == user.id, PasswordResetToken.is_used == False).update({"is_used": True})
+    platform_admin = None
+    
+    if not user:
+        platform_admin = db.query(PlatformAdmin).filter(PlatformAdmin.email == req.email).first()
+        
+    actor = user or platform_admin
+    
+    if actor:
+        # Invalidate previous tokens for this actor
+        if user:
+            db.query(PasswordResetToken).filter(PasswordResetToken.user_id == user.id, PasswordResetToken.is_used == False).update({"is_used": True})
+        else:
+            db.query(PasswordResetToken).filter(PasswordResetToken.platform_admin_id == platform_admin.id, PasswordResetToken.is_used == False).update({"is_used": True})
         
         token_str = str(uuid.uuid4())
         reset_token = PasswordResetToken(
-            user_id=user.id,
+            user_id=user.id if user else None,
+            platform_admin_id=platform_admin.id if platform_admin else None,
             token=token_str,
             expires_at=datetime.now(timezone.utc) + timedelta(hours=int(os.getenv("RESET_TOKEN_EXPIRY_HOURS", "1")))
         )
@@ -247,7 +258,7 @@ def forgot_password(request: Request, req: ForgotPasswordRequest, db: Session = 
         db.commit()
         
         reset_link = f"{os.getenv('INVITE_BASE_URL')}/reset-password?token={token_str}"
-        send_password_reset_email(user.email, reset_link)
+        send_password_reset_email(req.email, reset_link)
             
     return {"message": "If that email is registered, you'll receive a reset link."}
 
@@ -261,21 +272,32 @@ def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db)):
     if not reset_token or reset_token.expires_at < datetime.now(timezone.utc):
         raise HTTPException(status_code=400, detail="Invalid or expired token")
         
-    user = db.query(User).filter(User.id == reset_token.user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+    actor = None
+    if reset_token.user_id:
+        actor = db.query(User).filter(User.id == reset_token.user_id).first()
+    else:
+        actor = db.query(PlatformAdmin).filter(PlatformAdmin.id == reset_token.platform_admin_id).first()
         
-    user.hashed_pw = get_password_hash(req.new_password)
+    if not actor:
+        raise HTTPException(status_code=404, detail="Account not found")
+        
+    actor.hashed_pw = get_password_hash(req.new_password)
     reset_token.is_used = True
     
-    # Revoke all sessions
-    db.query(DBSession).filter(DBSession.user_id == user.id, DBSession.revoked == False).update({
-        "revoked": True,
-        "revoked_at": datetime.now(timezone.utc)
-    })
+    # Revoke all sessions for this actor
+    if reset_token.user_id:
+        db.query(DBSession).filter(DBSession.user_id == actor.id, DBSession.revoked == False).update({
+            "revoked": True,
+            "revoked_at": datetime.now(timezone.utc)
+        })
+    else:
+        db.query(DBSession).filter(DBSession.platform_admin_id == actor.id, DBSession.revoked == False).update({
+            "revoked": True,
+            "revoked_at": datetime.now(timezone.utc)
+        })
     
     db.commit()
-    log_event(db, "PASSWORD_RESET", "User reset their password", actor_id=user.id)
+    log_event(db, "PASSWORD_RESET", "User/Admin reset their password", actor_id=actor.id if reset_token.user_id else None)
     
     return {"message": "Password reset successfully"}
 

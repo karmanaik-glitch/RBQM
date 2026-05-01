@@ -26,13 +26,17 @@ def get_password_hash(password):
 def decode_jwt(token: str):
     return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
-def create_access_token(user: User, db: Session, expires_delta: Optional[timedelta] = None) -> str:
+def create_access_token(user: User, db: Session, request: Request, expires_delta: Optional[timedelta] = None) -> str:
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
         expire = datetime.now(timezone.utc) + timedelta(hours=TOKEN_EXPIRY_HOURS)
         
     jti = str(uuid.uuid4())
+    
+    # Capture device fingerprint
+    ip_address = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
     
     # Platform Admin doesn't have an org
     org_id = user.org_id if hasattr(user, "org_id") else None
@@ -50,11 +54,13 @@ def create_access_token(user: User, db: Session, expires_delta: Optional[timedel
     
     encoded_jwt = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
     
-    # Write session record
+    # Write session record with device fingerprint
     session_record = DBSession(
         jti=jti,
         user_id=user.id if hasattr(user, "org_id") else None,
         platform_admin_id=user.id if not hasattr(user, "org_id") else None,
+        ip_address=ip_address,
+        user_agent=user_agent[:200],
         expires_at=expire
     )
     db.add(session_record)
