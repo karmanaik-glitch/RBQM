@@ -39,13 +39,27 @@ origins = [
     "http://localhost:5173",
     "http://localhost:3000",
     "http://127.0.0.1:5173",
+    "https://rbqm.vercel.app"
 ]
 
 frontend_url = os.getenv("FRONTEND_URL")
 if frontend_url:
     base_url = frontend_url.rstrip('/')
-    origins.append(base_url)
+    if base_url not in origins:
+        origins.append(base_url)
     origins.append(f"{base_url}/")
+
+# Fail-safe CORS middleware
+@app.middleware("http")
+async def force_cors_middleware(request: Request, call_next):
+    origin = request.headers.get("origin")
+    response = await call_next(request)
+    if origin in origins:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+    return response
 
 app.add_middleware(TenancyMiddleware)
 
