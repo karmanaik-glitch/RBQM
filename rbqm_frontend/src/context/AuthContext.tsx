@@ -40,17 +40,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     params.append('username', email);
     params.append('password', password);
     const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
-    const res = await fetch(`${BASE_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params,
-      credentials: 'include'
-    });
-    if (!res.ok) throw new Error('Invalid credentials');
-    const data = await res.json();
-    setUser(data.user);
-    localStorage.setItem('rbqm_user', JSON.stringify(data.user));
-    if (data.access_token) localStorage.setItem('rbqm_token', data.access_token);
+    
+    // Abort after 10 seconds so the UI never hangs when API is unreachable
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    
+    try {
+      const res = await fetch(`${BASE_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params,
+        credentials: 'include',
+        signal: controller.signal
+      });
+      clearTimeout(timeout);
+      if (!res.ok) throw new Error('Invalid credentials');
+      const data = await res.json();
+      setUser(data.user);
+      localStorage.setItem('rbqm_user', JSON.stringify(data.user));
+      if (data.access_token) localStorage.setItem('rbqm_token', data.access_token);
+    } catch (err: any) {
+      clearTimeout(timeout);
+      if (err.name === 'AbortError') {
+        throw new Error('Connection timed out. Please verify the backend is running.');
+      }
+      throw err;
+    }
   };
 
   const logout = async () => {
