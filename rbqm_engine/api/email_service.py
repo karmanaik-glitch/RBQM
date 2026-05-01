@@ -26,9 +26,12 @@ def send_invite_email(to_email: str, invite_link: str, role: str, org_name: str)
             "subject": f"Invitation to join Vritas RBQM - {org_name}",
             "html": html_content
         })
+        print(f"RESEND SUCCESS: {response}")
         return response
     except Exception as e:
-        print(f"Error sending invite email: {e}")
+        import traceback
+        print(f"RESEND ERROR SENDING INVITE: {str(e)}")
+        print(traceback.format_exc())
         return None
 
 def send_password_reset_email(to_email: str, reset_link: str):

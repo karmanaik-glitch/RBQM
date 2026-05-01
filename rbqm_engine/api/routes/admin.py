@@ -91,7 +91,9 @@ def invite_user(request: Request, req: InviteUserRequest, db: Session = Depends(
         org = db.query(Organisation).filter(Organisation.id == org_id).first()
         org_name = org.name if org else "Vritas RBQM"
         
-        send_invite_email(req.email, invite_link, req.role, org_name)
+        email_res = send_invite_email(req.email, invite_link, req.role, org_name)
+        if email_res is None:
+            raise HTTPException(status_code=500, detail="Failed to send invitation email. Please check your Resend API key and Sending Domain.")
             
         return {"message": "Invitation sent", "invite_id": invite.id}
     except Exception as e:
