@@ -17,10 +17,12 @@ TOKEN_EXPIRY_HOURS = int(os.getenv("TOKEN_EXPIRY_HOURS", "24"))
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+    # Bcrypt has a 72-byte limit; truncate to prevent crash
+    return pwd_context.verify(plain_password[:72], hashed_password)
 
 def get_password_hash(password):
-    return pwd_context.hash(password)
+    # Bcrypt has a 72-byte limit; truncate to prevent crash
+    return pwd_context.hash(password[:72])
 
 def decode_jwt(token: str):
     return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
