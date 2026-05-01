@@ -11,18 +11,20 @@ export function VritasLogo({ className = '', variant = 'full' }: VritasLogoProps
 
   const symbol = (
     <svg 
-      viewBox="0 0 120 100" 
+      viewBox="0 0 100 120" 
       fill="none" 
       xmlns="http://www.w3.org/2000/svg"
-      className={variant === 'full' ? 'w-12 h-10 shrink-0' : 'w-full h-full'}
+      className={variant === 'full' ? 'w-12 h-12 shrink-0' : 'w-full h-full'}
     >
-      {/* Left Outer & Inner (Indigo) */}
-      <line x1="15" y1="10" x2="55" y2="90" stroke={indigo} strokeWidth="16" strokeLinecap="square" />
-      <line x1="45" y1="10" x2="60" y2="40" stroke={indigo} strokeWidth="16" strokeLinecap="square" />
+      {/* Left Outer (Indigo) */}
+      <polygon points="0,10 15,10 50,80 50,110" fill={indigo} />
+      {/* Left Inner (Indigo) */}
+      <polygon points="20,10 35,10 45,30 37.5,45" fill={indigo} />
       
-      {/* Right Outer & Inner (Emerald) */}
-      <line x1="105" y1="10" x2="65" y2="90" stroke={emerald} strokeWidth="16" strokeLinecap="square" />
-      <line x1="75" y1="10" x2="60" y2="40" stroke={emerald} strokeWidth="16" strokeLinecap="square" />
+      {/* Right Outer (Emerald) */}
+      <polygon points="100,10 85,10 50,80 50,110" fill={emerald} />
+      {/* Right Inner (Emerald) */}
+      <polygon points="80,10 65,10 55,30 62.5,45" fill={emerald} />
     </svg>
   );
 
