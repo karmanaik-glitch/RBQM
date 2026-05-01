@@ -14,15 +14,14 @@ SECRET_KEY = os.getenv("JWT_SECRET", "rbqm-platform-secret-2024-change-in-produc
 ALGORITHM = "HS256"
 TOKEN_EXPIRY_HOURS = int(os.getenv("TOKEN_EXPIRY_HOURS", "24"))
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Use PBKDF2-SHA256 for maximum compatibility across environments (avoids bcrypt's 72-char limit)
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 def verify_password(plain_password, hashed_password):
-    # Bcrypt has a 72-byte limit; truncate to prevent crash
-    return pwd_context.verify(plain_password[:72], hashed_password)
+    return pwd_context.verify(plain_password, hashed_password)
 
 def get_password_hash(password):
-    # Bcrypt has a 72-byte limit; truncate to prevent crash
-    return pwd_context.hash(password[:72])
+    return pwd_context.hash(password)
 
 def decode_jwt(token: str):
     return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
