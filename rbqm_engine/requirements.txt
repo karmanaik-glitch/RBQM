@@ -16,3 +16,4 @@ reportlab
 resend
 slowapi
 pyotp
+bcrypt
