@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { LayoutGrid, FlaskConical, Bell, FileText, LogOut, ChevronRight, Command, Sun, Moon, HelpCircle, Shield } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -55,28 +56,38 @@ export function Sidebar() {
         <VritasLogo variant="full" />
       </div>
 
-      <nav className="flex-1 px-4 space-y-1 mt-4">
+      <nav className="flex-1 px-4 space-y-1 mt-4 relative">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             className={({ isActive }) =>
-              `flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${isActive
-                ? 'bg-white/[0.05] text-foreground border-l-2 border-accent shadow-inner-highlight'
-                : 'text-foreground-muted hover:bg-white/[0.03] hover:text-foreground'
+              `relative flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 group ${
+                isActive ? 'text-foreground' : 'text-foreground-muted hover:text-foreground hover:bg-white/[0.03]'
               }`
             }
           >
-            <div className="flex items-center gap-3 relative">
-              <item.icon className={`w-4 h-4 transition-colors group-hover:text-accent`} />
-              {item.label}
-              {item.badge > 0 && (
-                <span className="absolute -top-1 -left-1 w-4 h-4 flex items-center justify-center rounded-full bg-red-500 text-white text-[8px] font-black animate-pulse">
-                  {item.badge}
-                </span>
-              )}
-            </div>
-            <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all text-accent" />
+            {({ isActive }) => (
+              <>
+                {isActive && (
+                  <motion.div
+                    layoutId="sidebar-active-pill"
+                    className="absolute inset-0 bg-white/[0.05] border border-white/[0.08] shadow-inner-highlight rounded-xl border-l-2 border-l-accent"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  />
+                )}
+                <div className="flex items-center gap-3 relative z-10">
+                  <item.icon className={`w-4 h-4 transition-colors ${isActive ? 'text-accent' : 'group-hover:text-accent'}`} />
+                  {item.label}
+                  {item.badge > 0 && (
+                    <span className="absolute -top-1 -left-1 w-4 h-4 flex items-center justify-center rounded-full bg-red-500 text-white text-[8px] font-black shadow-[0_0_10px_rgba(239,68,68,0.5)]">
+                      {item.badge}
+                    </span>
+                  )}
+                </div>
+                <ChevronRight size={14} className={`relative z-10 transition-all text-accent ${isActive ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0'}`} />
+              </>
+            )}
           </NavLink>
         ))}
 

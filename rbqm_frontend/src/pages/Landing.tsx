@@ -151,33 +151,72 @@ export default function Landing() {
             Demo: admin@acmecro.com / Password123! — Pre-loaded with sites and KRI data
           </motion.p>
 
-          {/* Dashboard Preview */}
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0, y: 40 }}
-            whileInView={{ scale: 1, opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-24 relative"
-          >
-            <div className="absolute inset-0 bg-accent-glow blur-[120px] -z-10 opacity-30" />
-            <div className="glass-card p-2">
-              <div className="bg-background-elevated rounded-xl p-8 grid grid-cols-3 gap-4 relative overflow-hidden">
-                <div className="absolute inset-0 grid-overlay opacity-20 pointer-events-none" />
-                <div className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-6 text-center hover:border-red-500/50 transition-colors group">
-                  <p className="text-3xl font-black text-red-400 group-hover:scale-110 transition-transform">12</p>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-2">RED KRIs</p>
+          {/* Floating Metric Cards */}
+          <div className="mt-24 relative h-64 md:h-80 w-full max-w-4xl mx-auto hidden md:block">
+            {/* Center Main Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 50, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 1, delay: 0.4, type: "spring" }}
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-80"
+            >
+              <div className="glass-card p-6 border-accent/30 shadow-[0_0_50px_rgba(94,106,210,0.2)]">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-xs font-bold text-foreground-muted tracking-widest uppercase">Platform Health</span>
+                  <Activity size={16} className="text-emerald-brand animate-pulse" />
                 </div>
-                <div className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-6 text-center hover:border-yellow-500/50 transition-colors group">
-                  <p className="text-3xl font-black text-yellow-400 group-hover:scale-110 transition-transform">18</p>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-2">YELLOW KRIs</p>
+                <div className="flex items-end gap-3 mb-2">
+                  <span className="text-5xl font-black text-white">98</span>
+                  <span className="text-sm font-bold text-emerald-brand mb-1.5">%</span>
                 </div>
-                <div className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-6 text-center hover:border-emerald-500/50 transition-colors group">
-                  <p className="text-3xl font-black text-emerald-400 group-hover:scale-110 transition-transform">70</p>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-2">GREEN KRIs</p>
+                <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
+                  <div className="bg-gradient-to-r from-accent to-emerald-brand h-full w-[98%]" />
                 </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+
+            {/* Left Floating Card */}
+            <motion.div
+              initial={{ opacity: 0, x: 50, y: 20 }}
+              animate={{ opacity: 1, x: 0, y: 0 }}
+              transition={{ duration: 1, delay: 0.6, type: "spring" }}
+              className="absolute left-[10%] top-[20%] z-10 w-64 animate-float"
+              style={{ animationDelay: '0s' }}
+            >
+              <div className="glass-card p-5 bg-white/[0.01]">
+                <div className="flex gap-3 items-center">
+                  <div className="w-10 h-10 rounded-xl bg-accent/20 border border-accent/30 flex items-center justify-center text-accent">
+                    <Shield size={18} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-white">ICH E6 R3</p>
+                    <p className="text-[10px] text-foreground-subtle tracking-widest uppercase">Audit Ready</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Right Floating Card */}
+            <motion.div
+              initial={{ opacity: 0, x: -50, y: -20 }}
+              animate={{ opacity: 1, x: 0, y: 0 }}
+              transition={{ duration: 1, delay: 0.8, type: "spring" }}
+              className="absolute right-[10%] bottom-[10%] z-30 w-64 animate-float"
+              style={{ animationDelay: '2s' }}
+            >
+              <div className="glass-card p-5 bg-white/[0.01] backdrop-blur-2xl">
+                <div className="flex gap-3 items-center">
+                  <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400">
+                    <Zap size={18} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-red-400">Critical Anomaly</p>
+                    <p className="text-[10px] text-white tracking-widest uppercase mt-0.5">Detected by AI</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </motion.div>
       </section>
 

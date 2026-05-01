@@ -89,19 +89,29 @@
 
 @layer components {
   .glass-card {
-    @apply bg-white/[0.03] border border-white/[0.06] rounded-2xl shadow-2xl backdrop-blur-md transition-all duration-300;
+    @apply bg-white/[0.02] border border-white/[0.05] rounded-3xl shadow-glass backdrop-blur-xl transition-all duration-500 relative overflow-hidden;
+  }
+  
+  /* Add subtle inner glow to all glass cards */
+  .glass-card::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 transition-opacity duration-500 pointer-events-none;
+  }
+
+  .glass-card:hover::before {
+    @apply opacity-100;
   }
 
   .glass-card-hover {
-    @apply hover:bg-white/[0.05] hover:border-white/[0.1] hover:shadow-emerald-500/10;
+    @apply hover:bg-white/[0.04] hover:border-white/[0.12] hover:shadow-glass-hover hover:-translate-y-1;
   }
 
   .text-gradient {
-    @apply bg-gradient-to-br from-white via-white/90 to-slate-400 bg-clip-text text-transparent;
+    @apply bg-gradient-to-br from-white via-slate-200 to-slate-500 bg-clip-text text-transparent;
   }
 
   .text-accent-gradient {
-    @apply bg-gradient-to-r from-emerald-400 via-blue-500 to-emerald-400 bg-clip-text text-transparent animate-shimmer;
+    @apply bg-gradient-to-r from-accent-bright via-emerald-brand to-accent-bright bg-clip-text text-transparent animate-shimmer;
     background-size: 200% auto;
   }
 }

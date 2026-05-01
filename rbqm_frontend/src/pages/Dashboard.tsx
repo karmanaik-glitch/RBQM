@@ -15,6 +15,7 @@ import { HealthGauge }       from '../components/HealthGauge'
 import { SiteMap }           from '../components/SiteMap'
 import { SiteComparison }   from '../components/SiteComparison'
 import { Activity, Bell, FileText, LayoutGrid, Shield, RefreshCw, Map, GitCompareArrows } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 type Tab = 'overview' | 'lock' | 'alerts' | 'report' | 'heatmap' | 'map'
 
@@ -187,68 +188,105 @@ export default function Dashboard() {
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+            className={`relative flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
               tab === t.id
-                ? 'bg-white/[0.08] text-foreground shadow-inner-highlight'
+                ? 'text-foreground'
                 : 'text-foreground-muted hover:text-foreground hover:bg-white/[0.03]'
             }`}
           >
-            <t.icon size={16} className={tab === t.id ? 'text-accent' : 'text-foreground-subtle'} />
-            {t.label}
-            {t.badge != null && t.badge > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 rounded-md bg-accent/20 text-accent text-[10px] font-bold">
-                {t.badge}
-              </span>
+            {tab === t.id && (
+              <motion.div
+                layoutId="dashboard-tab-pill"
+                className="absolute inset-0 bg-white/[0.08] border border-white/[0.05] shadow-inner-highlight rounded-xl"
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              />
             )}
+            <div className="relative z-10 flex items-center gap-2">
+              <t.icon size={16} className={`transition-colors ${tab === t.id ? 'text-accent' : 'text-foreground-subtle group-hover:text-foreground-muted'}`} />
+              {t.label}
+              {t.badge != null && t.badge > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 rounded-md bg-accent/20 text-accent text-[10px] font-bold shadow-[0_0_10px_rgba(94,106,210,0.3)]">
+                  {t.badge}
+                </span>
+              )}
+            </div>
           </button>
         ))}
         </div>
       </div>
 
-      <div className="space-y-8">
-        {tab === 'overview' && (
-          <>
-            {/* Bento Grid Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* Site Selection & Feed - Left Column */}
-              <div className="lg:col-span-4 flex flex-col gap-6" data-tour="site-table">
-                <SpotlightCard className="p-0">
-                  <SiteTable sites={sites} selectedId={selectedSite} onSelect={setSelectedSite} />
-                </SpotlightCard>
-                <div data-tour="audit-stream">
-                  <RecentActivity />
+      <div className="space-y-8 relative min-h-[600px]">
+        <AnimatePresence mode="wait">
+          {tab === 'overview' && (
+            <motion.div
+              key="overview"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              {/* Bento Grid Layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                {/* Site Selection & Feed - Left Column */}
+                <div className="lg:col-span-4 flex flex-col gap-6" data-tour="site-table">
+                  <SpotlightCard className="p-0">
+                    <SiteTable sites={sites} selectedId={selectedSite} onSelect={setSelectedSite} />
+                  </SpotlightCard>
+                  <div data-tour="audit-stream">
+                    <RecentActivity />
+                  </div>
+                </div>
+
+                {/* Site Detail - Main Content */}
+                <div className="lg:col-span-8" data-tour="kri-detail">
+                  {selectedSite ? (
+                    <SpotlightCard>
+                      <SiteDetailPanel siteId={selectedSite} />
+                    </SpotlightCard>
+                  ) : (
+                    <div className="h-[600px] glass-card flex flex-col items-center justify-center text-foreground-muted space-y-4">
+                      <LayoutGrid size={48} className="opacity-20" />
+                      <p className="font-medium">Select a site to analyze risk profile</p>
+                      <p className="text-xs text-foreground-subtle">Use ↑↓ arrow keys or J/K to navigate</p>
+                    </div>
+                  )}
                 </div>
               </div>
-
-              {/* Site Detail - Main Content */}
-              <div className="lg:col-span-8" data-tour="kri-detail">
-                {selectedSite ? (
-                  <SpotlightCard>
-                    <SiteDetailPanel siteId={selectedSite} />
-                  </SpotlightCard>
-                ) : (
-                  <div className="h-[600px] glass-card flex flex-col items-center justify-center text-foreground-muted space-y-4">
-                    <LayoutGrid size={48} className="opacity-20" />
-                    <p className="font-medium">Select a site to analyze risk profile</p>
-                    <p className="text-xs text-foreground-subtle">Use ↑↓ arrow keys or J/K to navigate</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </>
-        )}
-
-        <div className="animate-fade-up" style={{ animationDelay: '0.1s' }}>
-          {tab === 'lock' && <LockReadiness onSiteSelect={handleSiteSelect} />}
-          {tab === 'alerts' && <AlertsPanel alerts={alerts} onSiteClick={handleSiteSelect} />}
-          {tab === 'heatmap' && <SiteHeatmap />}
-          {tab === 'map' && <SiteMap sites={sites} selectedId={selectedSite} onSelect={handleSiteSelect} />}
-          {tab === 'report' && (
-            <SpotlightCard className="p-8">
-              <ReportGenerator />
-            </SpotlightCard>
+            </motion.div>
           )}
-        </div>
+
+          {tab === 'lock' && (
+            <motion.div key="lock" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+              <LockReadiness onSiteSelect={handleSiteSelect} />
+            </motion.div>
+          )}
+          
+          {tab === 'alerts' && (
+            <motion.div key="alerts" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+              <AlertsPanel alerts={alerts} onSiteClick={handleSiteSelect} />
+            </motion.div>
+          )}
+          
+          {tab === 'heatmap' && (
+            <motion.div key="heatmap" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+              <SiteHeatmap />
+            </motion.div>
+          )}
+          
+          {tab === 'map' && (
+            <motion.div key="map" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+              <SiteMap sites={sites} selectedId={selectedSite} onSelect={handleSiteSelect} />
+            </motion.div>
+          )}
+          
+          {tab === 'report' && (
+            <motion.div key="report" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+              <SpotlightCard className="p-8">
+                <ReportGenerator />
+              </SpotlightCard>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Site Comparison Modal */}
