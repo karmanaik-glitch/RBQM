@@ -5,9 +5,9 @@ import { ActivitySkeleton } from './Skeleton';
 
 interface AuditLog {
   id: number;
-  event_type: string;
+  action: string;
   user_email: string;
-  detail: string;
+  detail: any;
   created_at: string;
 }
 
@@ -38,7 +38,8 @@ export function RecentActivity() {
   };
 
   const getIcon = (type: string) => {
-    switch (type) {
+    if (!type) return <History size={14} className="text-foreground-muted" />;
+    switch (type.toUpperCase()) {
       case 'LOGIN': return <User size={14} className="text-blue-400" />;
       case 'REGISTER': return <User size={14} className="text-purple-400" />;
       case 'TRIAL_CREATED': return <Zap size={14} className="text-emerald-400" />;
@@ -65,14 +66,14 @@ export function RecentActivity() {
         {logs.map((log) => (
           <div key={log.id} className="p-3 hover:bg-white/[0.03] rounded-xl transition-all duration-200 flex items-start gap-3 group">
             <div className="mt-0.5 p-2 bg-background-elevated border border-white/5 rounded-lg group-hover:border-white/10 transition-colors shadow-inner-highlight">
-              {getIcon(log.event_type)}
+              {getIcon(log.action)}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex justify-between items-center mb-0.5">
-                <span className="text-[10px] font-bold text-foreground tracking-tight uppercase">{log.event_type.replace('_', ' ')}</span>
+                <span className="text-[10px] font-bold text-foreground tracking-tight uppercase">{(log.action || 'ACTIVITY').replace('_', ' ')}</span>
                 <span className="text-[9px] text-foreground-subtle font-mono">{new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
-              <p className="text-xs text-foreground-muted truncate group-hover:text-foreground-subtle transition-colors">{log.detail}</p>
+              <p className="text-xs text-foreground-muted truncate group-hover:text-foreground-subtle transition-colors">{typeof log.detail === 'string' ? log.detail : JSON.stringify(log.detail)}</p>
             </div>
           </div>
         ))}
