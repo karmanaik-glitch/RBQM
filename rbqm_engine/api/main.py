@@ -47,13 +47,7 @@ if frontend_url:
     origins.append(base_url)
     origins.append(f"{base_url}/")
 
-@app.middleware("http")
-async def log_origin_middleware(request: Request, call_next):
-    origin = request.headers.get("origin")
-    if origin:
-        print(f"Incoming Origin: {origin}")
-    response = await call_next(request)
-    return response
+app.add_middleware(TenancyMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
@@ -78,8 +72,6 @@ async def global_exception_handler(request: Request, exc: Exception):
             "Access-Control-Allow-Credentials": "true"
         }
     )
-
-app.add_middleware(TenancyMiddleware)
 
 app.include_router(kri_router)
 app.include_router(lock_router)
