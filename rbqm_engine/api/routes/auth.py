@@ -99,9 +99,8 @@ def login(request: Request, response: Response, form_data: OAuth2PasswordRequest
     # Issue full token if no 2FA or not required
     token = create_access_token(actor, db)
     set_auth_cookie(response, token)
-    log_event(db, "LOGIN", "User logged in successfully", org_id=org_id, actor_id=actor.id)
-    
     org_id = actor.org_id if hasattr(actor, "org_id") else None
+    log_event(db, "LOGIN", "User logged in successfully", org_id=org_id, actor_id=actor.id)
     
     return {"requires_2fa": False, "user": {"id": actor.id, "email": actor.email, "role": role, "org_id": org_id}}
 
