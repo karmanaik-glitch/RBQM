@@ -43,13 +43,17 @@ origins = [
 
 frontend_url = os.getenv("FRONTEND_URL")
 if frontend_url:
-    # Ensure no trailing slash and add variations
     base_url = frontend_url.rstrip('/')
     origins.append(base_url)
     origins.append(f"{base_url}/")
-    
-# Log allowed origins for debugging in Render logs
-print(f"CORS Origins allowed: {origins}")
+
+@app.middleware("http")
+async def log_origin_middleware(request: Request, call_next):
+    origin = request.headers.get("origin")
+    if origin:
+        print(f"Incoming Origin: {origin}")
+    response = await call_next(request)
+    return response
 
 app.add_middleware(
     CORSMiddleware,
@@ -57,6 +61,7 @@ app.add_middleware(
     allow_credentials = True,
     allow_methods     = ["*"],
     allow_headers     = ["*"],
+    expose_headers    = ["*"]
 )
 
 from fastapi.responses import JSONResponse
