@@ -91,7 +91,8 @@ def login(request: Request, response: Response, form_data: OAuth2PasswordRequest
             # Actually, let's just use a special JWT.
             from jose import jwt
             from api.auth import SECRET_KEY, ALGORITHM
-            payload = {"sub": actor.email, "type": "pre_token", "exp": datetime.now(timezone.utc) + timedelta(minutes=5)}
+            exp = datetime.now(timezone.utc) + timedelta(minutes=5)
+            payload = {"sub": actor.email, "type": "pre_token", "exp": int(exp.timestamp())}
             encoded_pre = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
             return {"requires_2fa": True, "pre_token": encoded_pre}
 

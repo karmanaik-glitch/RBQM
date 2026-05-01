@@ -44,7 +44,7 @@ def create_access_token(user: User, db: Session, expires_delta: Optional[timedel
         "org_id": org_id,
         "org_name": org_name,
         "user_id": user.id,
-        "exp": expire,
+        "exp": int(expire.timestamp()),
     }
     
     encoded_jwt = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)

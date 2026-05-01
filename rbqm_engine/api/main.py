@@ -59,6 +59,21 @@ app.add_middleware(
     allow_headers     = ["*"],
 )
 
+from fastapi.responses import JSONResponse
+import logging
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logging.error(f"Global error: {str(exc)}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Server Error", "error": str(exc)},
+        headers={
+            "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
+            "Access-Control-Allow-Credentials": "true"
+        }
+    )
+
 app.add_middleware(TenancyMiddleware)
 
 app.include_router(kri_router)

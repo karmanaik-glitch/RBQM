@@ -73,6 +73,32 @@ export function Login() {
           >
             Sign In
           </button>
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-700"></div></div>
+            <div className="relative flex justify-center text-xs uppercase"><span className="bg-[#1e232e] px-2 text-slate-500">Or continue with</span></div>
+          </div>
+
+          <button
+            type="button"
+            onClick={async () => {
+              setEmail('admin@acmecro.com');
+              setPassword('Password123!');
+              // Wait a tiny bit for state to update (optional, but cleaner for UI)
+              setTimeout(async () => {
+                 try {
+                   await login('admin@acmecro.com', 'Password123!');
+                   addToast('success', 'Demo Access Granted', 'Exploring as ACME CRO Admin');
+                   navigate('/dashboard');
+                 } catch (err: any) {
+                   setError('Demo login failed. Check connection.');
+                 }
+              }, 100);
+            }}
+            className="w-full bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 font-medium py-2.5 rounded-lg hover:bg-emerald-500/20 transition-all flex items-center justify-center gap-2"
+          >
+            Quick Demo Login
+          </button>
         </form>
         
         <div className="border-t border-slate-700 px-6 py-4 text-center">
