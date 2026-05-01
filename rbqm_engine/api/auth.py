@@ -77,18 +77,27 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
             detail="Could not validate credentials",
         )
         
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
         jti: str = payload.get("jti")
         if email is None or jti is None:
+            print(f"AUTH ERROR: Missing sub or jti in token: {payload}")
             raise credentials_exception
-    except JWTError:
+    except JWTError as e:
+        print(f"AUTH ERROR: JWT Decode error: {str(e)}")
         raise credentials_exception
         
     # Check if session is valid and not revoked
     session_record = db.query(DBSession).filter(DBSession.jti == jti, DBSession.revoked == False).first()
     if not session_record:
+        print(f"AUTH ERROR: Session {jti} not found or revoked")
         raise HTTPException(status_code=401, detail="Session revoked or invalid")
         
     # Could be User or PlatformAdmin
@@ -99,6 +108,7 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
         user = db.query(PlatformAdmin).filter(PlatformAdmin.id == session_record.platform_admin_id).first()
         
     if user is None:
+        print(f"AUTH ERROR: User not found for session {jti}")
         raise credentials_exception
         
     return user
