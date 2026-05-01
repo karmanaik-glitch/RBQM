@@ -95,6 +95,22 @@ def update_user(request: Request, user_id: int, req: UpdateUserRoleRequest, db: 
     db.commit()
     return {"message": "User updated"}
 
+@router.delete("/users/{user_id}")
+def delete_user(request: Request, user_id: int, db: Session = Depends(get_db)):
+    # Platform Admin can delete anyone, CRO Admin can only delete from their org
+    role = getattr(request.state, "role", None)
+    if role == "platform_admin":
+        user = db.query(User).filter(User.id == user_id).first()
+    else:
+        user = db.query(User).filter(User.id == user_id, User.org_id == request.state.org_id).first()
+        
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    db.delete(user)
+    db.commit()
+    return {"message": "User removed from system"}
+
 @router.get("/invitations")
 def get_invitations(request: Request, db: Session = Depends(get_db)):
     invites = db.query(Invitation).filter(Invitation.org_id == request.state.org_id).all()

@@ -169,6 +169,23 @@ function UserManagement({ orgs }: { orgs: any[] }) {
     } catch (e) { alert('Connection error'); }
   };
 
+    } catch (e) { alert('Connection error'); }
+  };
+
+  const handleDeleteUser = async (id: number) => {
+    if (!confirm('Remove this user from the organization?')) return;
+    try {
+      const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+      const token = localStorage.getItem('rbqm_token');
+      const res = await fetch(`${BASE_URL}/api/admin/users/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) fetchUsers();
+      else alert('Failed to remove user');
+    } catch (e) { alert('Connection error'); }
+  };
+
   useState(() => { fetchUsers(); });
 
   return (
@@ -240,6 +257,7 @@ function UserManagement({ orgs }: { orgs: any[] }) {
               <th className="px-4 py-3">Role</th>
               <th className="px-4 py-3">Organisation</th>
               <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-700/50">
@@ -255,6 +273,15 @@ function UserManagement({ orgs }: { orgs: any[] }) {
                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${u.is_active ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
                     {u.is_active ? 'ACTIVE' : 'INACTIVE'}
                   </span>
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <button 
+                    onClick={() => handleDeleteUser(u.id)}
+                    className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                    title="Remove User"
+                  >
+                    <Trash2 size={14} />
+                  </button>
                 </td>
               </tr>
             ))}
