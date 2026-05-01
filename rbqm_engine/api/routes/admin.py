@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime, timedelta, timezone
 from db.database import get_db
-from db.models import User, Invitation, UserSiteAssignment, KRILibrary, StudyTeamMember, Trial, Site
+from db.models import User, Invitation, UserSiteAssignment, KRILibrary, StudyTeamMember, Trial, Site, Organisation
 from api.permissions import require_cro_admin
 from api.auth import get_password_hash
 import uuid
