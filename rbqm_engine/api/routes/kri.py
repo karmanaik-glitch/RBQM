@@ -20,7 +20,7 @@ import os
 
 router = APIRouter(prefix="/api/kri", tags=["KRI Engine"], dependencies=[Depends(require_any_authenticated)])
 
-DATA_DIR = "data"
+DATA_DIR = "Data"
 
 
 def _load_data():

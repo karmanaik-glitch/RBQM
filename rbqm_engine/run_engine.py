@@ -24,7 +24,7 @@ init(autoreset=True)   # colorama — works on Windows
 
 # ── LOAD DATA ─────────────────────────────────────────────────────────────────
 
-def load_data(data_dir="data"):
+def load_data(data_dir="Data"):
     required = ["sites", "patients", "visits", "queries",
                 "saes", "deviations", "ip_records", "measurements"]
     missing = [f for f in required if not os.path.exists(f"{data_dir}/{f}.csv")]
