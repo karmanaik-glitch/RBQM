@@ -5,6 +5,20 @@ import { Shield, Users, Building, Link as LinkIcon, Database, Trash2 } from 'luc
 export function AdminPanel() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('users');
+  const [orgs, setOrgs] = useState<any[]>([]);
+
+  const fetchOrgs = async () => {
+    try {
+      const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+      const token = localStorage.getItem('rbqm_token');
+      const res = await fetch(`${BASE_URL}/api/platform/orgs`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) setOrgs(await res.json());
+    } catch (e) { console.error(e); }
+  };
+
+  useState(() => { if (user?.role === 'platform_admin') fetchOrgs(); });
 
   if (user?.role !== 'cro_admin' && user?.role !== 'platform_admin') {
     return (
@@ -17,20 +31,7 @@ export function AdminPanel() {
   const renderContent = () => {
     switch (activeTab) {
       case 'users':
-        return (
-          <div className="space-y-4">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-medium text-slate-200">User Management</h3>
-              <button className="bg-emerald-600 text-white px-4 py-2 rounded text-sm hover:bg-emerald-500 transition-colors">
-                Invite User
-              </button>
-            </div>
-            {/* Placeholder for Users Table */}
-            <div className="bg-slate-900 border border-slate-700 rounded-lg p-8 text-center text-slate-500">
-              User list will appear here
-            </div>
-          </div>
-        );
+        return <UserManagement orgs={orgs} />;
       case 'kri':
         return (
           <div className="space-y-4">
@@ -56,7 +57,7 @@ export function AdminPanel() {
           </div>
         );
       case 'orgs':
-        return <OrgManagement />;
+        return <OrgManagement orgs={orgs} fetchOrgs={fetchOrgs} />;
       default:
         return null;
     }
@@ -119,25 +120,162 @@ export function AdminPanel() {
   );
 }
 
-function OrgManagement() {
-  const [orgs, setOrgs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showAdd, setShowAdd] = useState(false);
-  const [newOrg, setNewOrg] = useState({ name: '', slug: '', tier: 'standard' });
+  );
+}
 
-  const fetchOrgs = async () => {
+function UserManagement({ orgs }: { orgs: any[] }) {
+  const { user } = useAuth();
+  const [showInvite, setShowInvite] = useState(false);
+  const [inviteData, setInviteData] = useState({ email: '', role: 'cro_admin', org_id: '' });
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchUsers = async () => {
     try {
       const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
       const token = localStorage.getItem('rbqm_token');
-      const res = await fetch(`${BASE_URL}/api/platform/orgs`, {
+      const res = await fetch(`${BASE_URL}/api/admin/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      if (res.ok) setOrgs(await res.json());
+      if (res.ok) setUsers(await res.json());
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
 
+  const handleInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+      const token = localStorage.getItem('rbqm_token');
+      const res = await fetch(`${BASE_URL}/api/admin/users/invite`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({
+          email: inviteData.email,
+          role: inviteData.role,
+          org_id: user?.role === 'platform_admin' ? parseInt(inviteData.org_id) : undefined
+        })
+      });
+      if (res.ok) {
+        alert('Invitation sent successfully!');
+        setShowInvite(false);
+      } else {
+        const err = await res.json();
+        alert(err.detail || 'Failed to send invitation');
+      }
+    } catch (e) { alert('Connection error'); }
+  };
+
+  useState(() => { fetchUsers(); });
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-medium text-slate-200">User Management</h3>
+        <button 
+          onClick={() => setShowInvite(true)}
+          className="bg-emerald-600 text-white px-4 py-2 rounded text-sm hover:bg-emerald-500 transition-colors"
+        >
+          Invite New User
+        </button>
+      </div>
+
+      {showInvite && (
+        <div className="bg-slate-900/50 border border-emerald-500/30 p-6 rounded-xl mb-6">
+          <form onSubmit={handleInvite} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <div className="col-span-1">
+              <label className="block text-[10px] uppercase tracking-widest text-slate-500 mb-2">Email Address</label>
+              <input 
+                type="email"
+                value={inviteData.email}
+                onChange={e => setInviteData({...inviteData, email: e.target.value})}
+                className="w-full bg-slate-800 border border-slate-700 rounded p-2 text-sm text-slate-200 focus:border-emerald-500 outline-none"
+                placeholder="user@company.com"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] uppercase tracking-widest text-slate-500 mb-2">Role</label>
+              <select 
+                value={inviteData.role}
+                onChange={e => setInviteData({...inviteData, role: e.target.value})}
+                className="w-full bg-slate-800 border border-slate-700 rounded p-2 text-sm text-slate-200 focus:border-emerald-500 outline-none"
+              >
+                <option value="cro_admin">CRO Admin</option>
+                <option value="central_monitor">Central Monitor</option>
+                <option value="site_monitor">Site Monitor</option>
+                <option value="sponsor_viewer">Sponsor Viewer</option>
+              </select>
+            </div>
+            {user?.role === 'platform_admin' && (
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest text-slate-500 mb-2">Target Organisation</label>
+                <select 
+                  value={inviteData.org_id}
+                  onChange={e => setInviteData({...inviteData, org_id: e.target.value})}
+                  className="w-full bg-slate-800 border border-emerald-500/50 rounded p-2 text-sm text-slate-200 focus:border-emerald-500 outline-none"
+                  required
+                >
+                  <option value="">Select Org...</option>
+                  {orgs.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
+                </select>
+              </div>
+            )}
+            <div className="flex gap-2">
+              <button type="submit" className="flex-1 bg-emerald-600 text-white p-2 rounded text-sm font-bold uppercase tracking-widest hover:bg-emerald-500">Send Invite</button>
+              <button type="button" onClick={() => setShowInvite(false)} className="px-4 bg-slate-700 text-slate-300 rounded text-sm hover:bg-slate-600">Cancel</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      <div className="bg-slate-900/30 border border-slate-700/50 rounded-xl overflow-hidden">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-slate-800/50 text-[10px] uppercase tracking-widest text-slate-400">
+            <tr>
+              <th className="px-4 py-3">User</th>
+              <th className="px-4 py-3">Role</th>
+              <th className="px-4 py-3">Organisation</th>
+              <th className="px-4 py-3">Status</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-700/50">
+            {users.map(u => (
+              <tr key={u.id} className="hover:bg-white/[0.02]">
+                <td className="px-4 py-3">
+                  <div className="font-medium text-slate-200">{u.full_name || 'Pending Invite'}</div>
+                  <div className="text-xs text-slate-500">{u.email}</div>
+                </td>
+                <td className="px-4 py-3 capitalize text-slate-400">{u.role.replace('_', ' ')}</td>
+                <td className="px-4 py-3 text-slate-400">{u.org_name || 'N/A'}</td>
+                <td className="px-4 py-3">
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${u.is_active ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+                    {u.is_active ? 'ACTIVE' : 'INACTIVE'}
+                  </span>
+                </td>
+              </tr>
+            ))}
+            {!loading && users.length === 0 && (
+              <tr>
+                <td colSpan={4} className="px-4 py-8 text-center text-slate-500 italic">No users found in this view</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function OrgManagement({ orgs, fetchOrgs }: { orgs: any[], fetchOrgs: () => void }) {
+  const [showAdd, setShowAdd] = useState(false);
+  const [newOrg, setNewOrg] = useState({ name: '', slug: '', tier: 'standard' });
+
   const handleAdd = async (e: React.FormEvent) => {
+    // ... rest of handleAdd logic using fetchOrgs() from props
     e.preventDefault();
     try {
       const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
@@ -177,8 +315,6 @@ function OrgManagement() {
       else alert('Failed to delete organization');
     } catch (e) { alert('Connection error'); }
   };
-
-  useState(() => { fetchOrgs(); });
 
   return (
     <div className="space-y-6">
@@ -256,9 +392,9 @@ function OrgManagement() {
                 </td>
               </tr>
             ))}
-            {!loading && orgs.length === 0 && (
+            {orgs.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-slate-500 italic">No organizations found</td>
+                <td colSpan={5} className="px-4 py-8 text-center text-slate-500 italic">No organizations found</td>
               </tr>
             )}
           </tbody>
