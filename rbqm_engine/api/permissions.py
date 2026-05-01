@@ -14,8 +14,9 @@ def require_cro_admin(request: Request):
 
 def require_central_monitor(request: Request):
     role = getattr(request.state, "role", None)
-    if role not in ["cro_admin", "central_monitor", "platform_admin"]:
-        raise HTTPException(status_code=403, detail="Central Monitor access required")
+    central_roles = ["cro_admin", "central_monitor", "platform_admin", "project_manager", "cdm_lead", "data_manager"]
+    if role not in central_roles:
+        raise HTTPException(status_code=403, detail="Higher-level access required")
     return request.state
 
 def require_any_authenticated(request: Request):
@@ -39,11 +40,11 @@ def require_study_access(study_id: int):
         if not trial:
             raise HTTPException(status_code=404, detail="Study not found")
 
-        if role in ["cro_admin", "central_monitor"]:
+        if role in ["cro_admin", "central_monitor", "project_manager", "cdm_lead", "data_manager"]:
             if trial.org_id != org_id:
                 raise HTTPException(status_code=403, detail="Study belongs to a different organisation")
-            # If we enforce study_team_members for central monitors
-            if role == "central_monitor":
+            # If we enforce study_team_members for specific roles
+            if role in ["central_monitor", "cdm_lead"]:
                 has_team = db.query(StudyTeamMember).filter(StudyTeamMember.study_id == study_id).count() > 0
                 if has_team:
                     member = db.query(StudyTeamMember).filter(
@@ -91,7 +92,7 @@ def require_site_access(site_id: int, study_id: int):
         if not trial:
             raise HTTPException(status_code=404, detail="Study not found")
 
-        if role in ["cro_admin", "central_monitor"]:
+        if role in ["cro_admin", "central_monitor", "project_manager", "cdm_lead", "data_manager"]:
             if trial.org_id != org_id:
                 raise HTTPException(status_code=403, detail="Site belongs to a different organisation")
             return request.state

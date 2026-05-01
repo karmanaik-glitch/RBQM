@@ -222,7 +222,10 @@ function UserManagement({ orgs }: { orgs: any[] }) {
                 className="w-full bg-slate-800 border border-slate-700 rounded p-2 text-sm text-slate-200 focus:border-emerald-500 outline-none"
               >
                 <option value="cro_admin">CRO Admin</option>
+                <option value="project_manager">Project Manager</option>
                 <option value="central_monitor">Central Monitor</option>
+                <option value="cdm_lead">CDM Lead</option>
+                <option value="data_manager">Data Manager</option>
                 <option value="site_monitor">Site Monitor</option>
                 <option value="sponsor_viewer">Sponsor Viewer</option>
               </select>
