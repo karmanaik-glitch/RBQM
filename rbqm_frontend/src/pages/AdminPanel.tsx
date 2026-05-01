@@ -120,9 +120,6 @@ export function AdminPanel() {
   );
 }
 
-  );
-}
-
 function UserManagement({ orgs }: { orgs: any[] }) {
   const { user } = useAuth();
   const [showInvite, setShowInvite] = useState(false);
