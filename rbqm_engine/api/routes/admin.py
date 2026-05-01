@@ -40,7 +40,16 @@ class StudyTeamAssignRequest(BaseModel):
 
 @router.post("/users/invite")
 def invite_user(request: Request, req: InviteUserRequest, db: Session = Depends(get_db)):
-    org_id = request.state.org_id
+    role = getattr(request.state, "role", None)
+    
+    # Platform Admin can specify org_id, others use their own
+    if role == "platform_admin":
+        if not req.org_id:
+            raise HTTPException(status_code=400, detail="Platform Admin must specify org_id for invitations")
+        org_id = req.org_id
+    else:
+        org_id = request.state.org_id
+        
     user_id = request.state.user_id
     
     existing_user = db.query(User).filter(User.email == req.email).first()
@@ -61,7 +70,7 @@ def invite_user(request: Request, req: InviteUserRequest, db: Session = Depends(
     db.add(invite)
     db.commit()
     
-    log_event(db, "INVITATION_SENT", f"Invited {req.email} with role {req.role}", org_id=org_id, actor_id=user_id)
+    log_event(db, "INVITATION_SENT", f"Invited {req.email} with role {req.role} to org {org_id}", org_id=org_id, actor_id=user_id)
     
     invite_link = f"{os.getenv('INVITE_BASE_URL')}/accept-invite?token={token}"
     org_name = request.state.org_name if hasattr(request.state, "org_name") else "Our Organisation"
