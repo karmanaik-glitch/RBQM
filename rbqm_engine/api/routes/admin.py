@@ -18,6 +18,7 @@ router = APIRouter(prefix="/api/admin", tags=["admin"], dependencies=[Depends(re
 class InviteUserRequest(BaseModel):
     email: str
     role: str
+    org_id: Optional[int] = None
 
 class UpdateUserRoleRequest(BaseModel):
     role: str
