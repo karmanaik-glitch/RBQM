@@ -12,25 +12,18 @@ from api.auth import get_password_hash
 
 def seed_db():
     print("Connecting to DB...")
-    # Drop existing schema to ensure clean slate with new columns
-    Base.metadata.drop_all(bind=engine)
-    # Initialize schema
-    Base.metadata.create_all(bind=engine)
-    
+    print("Clearing existing data...")
     db = SessionLocal()
-    
     try:
-        print("Clearing existing data...")
-        # Simplistic clearing. Note: In real scenarios, use truncate cascade.
-        db.query(UserSiteAssignment).delete()
-        db.query(StudyTeamMember).delete()
-        db.query(KRILibrary).delete()
-        db.query(Site).delete()
-        db.query(Trial).delete()
-        db.query(User).delete()
-        db.query(Organisation).delete()
-        db.query(PlatformAdmin).delete()
+        # Use a list of tables in reverse dependency order
+        tables = [
+            UserSiteAssignment, StudyTeamMember, KRILibrary, 
+            Site, Trial, User, Organisation, PlatformAdmin
+        ]
+        for table in tables:
+            db.query(table).delete()
         db.commit()
+        print("Schema cleared successfully.")
 
         print("Seeding Platform Admin...")
         padmin = PlatformAdmin(
