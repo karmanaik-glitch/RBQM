@@ -26,6 +26,12 @@ class TenancyMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         token = request.cookies.get("rbqm_token")
         
+        # Fallback: check Authorization header if cookie is missing
+        if not token:
+            auth_header = request.headers.get("Authorization")
+            if auth_header and auth_header.startswith("Bearer "):
+                token = auth_header.split(" ")[1]
+        
         if token and request.url.path not in PUBLIC_PATHS:
             try:
                 payload = decode_jwt(token)
