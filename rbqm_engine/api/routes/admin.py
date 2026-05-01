@@ -87,7 +87,13 @@ def invite_user(request: Request, req: InviteUserRequest, db: Session = Depends(
         
         log_event(db, "INVITATION_SENT", f"Invited {req.email} to org {org_id}", org_id=org_id, actor_id=user_id)
         
-        invite_link = f"{os.getenv('INVITE_BASE_URL')}/accept-invite?token={token}"
+        # Determine base URL dynamically if not provided in env
+        base_url = os.getenv("INVITE_BASE_URL")
+        if not base_url:
+            # Try to get origin from headers (frontend URL)
+            base_url = request.headers.get("origin", "http://localhost:5173")
+            
+        invite_link = f"{base_url}/accept-invite?token={token}"
         org = db.query(Organisation).filter(Organisation.id == org_id).first()
         org_name = org.name if org else "Vritas RBQM"
         
