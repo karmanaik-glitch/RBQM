@@ -136,6 +136,7 @@ class UserSiteAssignment(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
+    study_id = Column(Integer, ForeignKey("trials.id", ondelete="CASCADE"), nullable=False)
     assigned_by = Column(Integer, ForeignKey("users.id"))
     platform_admin_id = Column(Integer, ForeignKey("platform_admins.id"))
     assigned_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
@@ -143,7 +144,7 @@ class UserSiteAssignment(Base):
 
     user = relationship("User", back_populates="site_assignments", foreign_keys=[user_id])
     site = relationship("Site", back_populates="user_site_assignments")
-    trial = relationship("Trial", back_populates="user_site_assignments")
+    trial = relationship("Trial", back_populates="user_site_assignments", foreign_keys=[study_id])
 
 class KRILibrary(Base):
     __tablename__ = "kri_library"
