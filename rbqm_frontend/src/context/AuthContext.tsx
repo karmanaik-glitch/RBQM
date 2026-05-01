@@ -50,6 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const data = await res.json();
     setUser(data.user);
     localStorage.setItem('rbqm_user', JSON.stringify(data.user));
+    if (data.access_token) localStorage.setItem('rbqm_token', data.access_token);
   };
 
   const logout = async () => {
@@ -64,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setUser(null);
     localStorage.removeItem('rbqm_user');
+    localStorage.removeItem('rbqm_token');
     window.location.href = '/';
   };
 

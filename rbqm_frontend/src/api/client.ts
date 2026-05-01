@@ -11,6 +11,7 @@ async function fetchWithAuth<T>(url: string, options: RequestInit = {}): Promise
     credentials: 'include', // Iron Triangle: Always send httpOnly cookie
     headers: {
       ...options.headers,
+      ...(localStorage.getItem('rbqm_token') ? { 'Authorization': `Bearer ${localStorage.getItem('rbqm_token')}` } : {})
     },
   }
   const res = await fetch(url, mergedOptions)

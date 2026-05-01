@@ -27,7 +27,7 @@ def set_auth_cookie(response: Response, token: str):
         value=token,
         httponly=True,
         secure=True,
-        samesite="strict",
+        samesite="none",
         max_age=int(os.getenv("TOKEN_EXPIRY_HOURS", "24")) * 3600,
         path="/"
     )
@@ -102,7 +102,11 @@ def login(request: Request, response: Response, form_data: OAuth2PasswordRequest
     org_id = actor.org_id if hasattr(actor, "org_id") else None
     log_event(db, "LOGIN", "User logged in successfully", org_id=org_id, actor_id=actor.id)
     
-    return {"requires_2fa": False, "user": {"id": actor.id, "email": actor.email, "role": role, "org_id": org_id}}
+    return {
+        "requires_2fa": False, 
+        "access_token": token,
+        "user": {"id": actor.id, "email": actor.email, "role": role, "org_id": org_id}
+    }
 
 
 @router.post("/2fa/verify")
@@ -131,7 +135,11 @@ def verify_2fa(req: Verify2FARequest, response: Response, db: Session = Depends(
         
     token = create_access_token(user, db)
     set_auth_cookie(response, token)
-    return {"message": "2FA verified", "user": {"id": user.id, "email": user.email, "role": user.role, "org_id": user.org_id}}
+    return {
+        "message": "2FA verified", 
+        "access_token": token,
+        "user": {"id": user.id, "email": user.email, "role": user.role, "org_id": user.org_id}
+    }
 
 @router.get("/me")
 def read_users_me(current_user = Depends(get_current_user)):

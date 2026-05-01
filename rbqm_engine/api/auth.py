@@ -63,14 +63,19 @@ def create_access_token(user: User, db: Session, expires_delta: Optional[timedel
     return encoded_jwt
 
 def get_current_user(request: Request, db: Session = Depends(get_db)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-    )
-    
     token = request.cookies.get("rbqm_token")
+    
+    # Fallback: check Authorization header if cookie is missing
     if not token:
-        raise credentials_exception
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.split(" ")[1]
+            
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+        )
         
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
