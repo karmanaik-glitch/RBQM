@@ -23,24 +23,14 @@ router = APIRouter(prefix="/api/kri", tags=["KRI Engine"], dependencies=[Depends
 DATA_DIR = "Data"
 
 
-def _load_data():
+def _load_data(data_dir=DATA_DIR):
     required = ["sites", "patients", "visits", "queries",
                 "saes", "deviations", "ip_records", "measurements"]
     for f in required:
-        if not os.path.exists(f"{DATA_DIR}/{f}.csv"):
-            raise FileNotFoundError(
-                f"{f}.csv not found. Run generate_data.py first."
-            )
-    return {
-        "sites":        pd.read_csv(f"{DATA_DIR}/sites.csv"),
-        "patients":     pd.read_csv(f"{DATA_DIR}/patients.csv"),
-        "visits":       pd.read_csv(f"{DATA_DIR}/visits.csv"),
-        "queries":      pd.read_csv(f"{DATA_DIR}/queries.csv"),
-        "saes":         pd.read_csv(f"{DATA_DIR}/saes.csv"),
-        "deviations":   pd.read_csv(f"{DATA_DIR}/deviations.csv"),
-        "ip_records":   pd.read_csv(f"{DATA_DIR}/ip_records.csv"),
-        "measurements": pd.read_csv(f"{DATA_DIR}/measurements.csv"),
-    }
+        if not os.path.exists(f"{data_dir}/{f}.csv"):
+            return None
+            
+    return {f: pd.read_csv(f"{data_dir}/{f}.csv") for f in required}
 
 
 def _get_threshold_overrides(study_id: int, org_id: int, db: Session) -> dict:
@@ -54,6 +44,20 @@ def _get_threshold_overrides(study_id: int, org_id: int, db: Session) -> dict:
         cache[k.kri_id] = {"yellow": k.yellow_threshold, "red": k.red_threshold}
         
     return cache
+
+def _get_data_for_context(request: Request, db: Session):
+    trial_id_str = request.query_params.get("trial_id", "TRIAL-2024-001")
+    
+    # If it's the official demo trial ID, load from central Data folder
+    if trial_id_str == "TRIAL-2024-001":
+        return _load_data("Data")
+    
+    # Otherwise, check the trial's specific upload folder
+    trial_data_dir = f"uploads/{trial_id_str}"
+    if os.path.exists(trial_data_dir):
+        return _load_data(trial_data_dir)
+        
+    return None
 
 def _build_reports(data, request: Request, db: Session):
     reports = []
@@ -136,7 +140,13 @@ def _report_to_dict(report):
 @router.get("/summary")
 def get_summary(request: Request, db: Session = Depends(get_db)):
     """Portfolio-level KRI summary across all sites."""
-    data    = _load_data()
+    data = _get_data_for_context(request, db)
+    if not data:
+        return {
+            "trial_id": request.query_params.get("trial_id", "No Data"),
+            "total_sites": 0, "total_red": 0, "total_yellow": 0, "total_green": 0,
+            "sites_by_risk": {}, "critical_sites": [], "alerts_count": 0, "lock_ready_count": 0
+        }
     reports = _build_reports(data, request, db)
 
     total_red    = sum(r.red_count for r in reports)
@@ -162,7 +172,8 @@ def get_summary(request: Request, db: Session = Depends(get_db)):
 @router.get("/sites")
 def get_sites(request: Request, db: Session = Depends(get_db)):
     """All sites with their risk level and KRI counts."""
-    data    = _load_data()
+    data = _get_data_for_context(request, db)
+    if not data: return []
     reports = _build_reports(data, request, db)
 
     return [
@@ -181,7 +192,9 @@ def get_sites(request: Request, db: Session = Depends(get_db)):
 @router.get("/site/{site_id}")
 def get_site(site_id: str, request: Request, db: Session = Depends(get_db)):
     """Full KRI report for a single site."""
-    data    = _load_data()
+    data = _get_data_for_context(request, db)
+    if not data:
+        raise HTTPException(status_code=404, detail="No data available for this trial.")
     reports = _build_reports(data, request, db)
 
     match = next((r for r in reports if r.site_id == site_id), None)
@@ -195,7 +208,8 @@ def get_site(site_id: str, request: Request, db: Session = Depends(get_db)):
 @router.get("/alerts")
 def get_alerts(request: Request, db: Session = Depends(get_db)):
     """All RED KRIs across all sites — action required list."""
-    data    = _load_data()
+    data = _get_data_for_context(request, db)
+    if not data: return {"total_alerts": 0, "alerts": []}
     reports = _build_reports(data, request, db)
 
     alerts = []
@@ -222,7 +236,8 @@ def get_alerts(request: Request, db: Session = Depends(get_db)):
 @router.get("/domain/{domain_name}")
 def get_by_domain(domain_name: str, request: Request, db: Session = Depends(get_db)):
     """All KRI results for a specific domain across all sites."""
-    data    = _load_data()
+    data = _get_data_for_context(request, db)
+    if not data: return []
     reports = _build_reports(data, request, db)
 
     results = []

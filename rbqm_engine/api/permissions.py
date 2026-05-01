@@ -19,7 +19,9 @@ def require_central_monitor(request: Request):
     return request.state
 
 def require_any_authenticated(request: Request):
-    if not hasattr(request.state, "user_id") or not request.state.user_id:
+    user_id = getattr(request.state, "user_id", None)
+    role = getattr(request.state, "role", None)
+    if not role:
         raise HTTPException(status_code=401, detail="Authentication required")
     return request.state
 
