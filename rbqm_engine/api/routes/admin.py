@@ -40,49 +40,59 @@ class StudyTeamAssignRequest(BaseModel):
 
 @router.post("/users/invite")
 def invite_user(request: Request, req: InviteUserRequest, db: Session = Depends(get_db)):
-    role = getattr(request.state, "role", None)
-    
-    # Platform Admin can specify org_id, but ONLY invite CRO Admins
-    if role == "platform_admin":
-        if not req.org_id:
-            raise HTTPException(status_code=400, detail="Platform Admin must specify org_id for invitations")
-        if req.role != "cro_admin":
-            raise HTTPException(status_code=400, detail="Platform Admin can only invite CRO Admins")
-        org_id = req.org_id
-    else:
-        org_id = request.state.org_id
+    try:
+        role = getattr(request.state, "role", None)
         
-    user_id = request.state.user_id
-    
-    existing_user = db.query(User).filter(User.email == req.email).first()
-    if existing_user:
-        raise HTTPException(status_code=400, detail="User already exists")
+        # Platform Admin can specify org_id, but ONLY invite CRO Admins
+        if role == "platform_admin":
+            if not req.org_id:
+                raise HTTPException(status_code=400, detail="Platform Admin must specify org_id")
+            if req.role != "cro_admin":
+                raise HTTPException(status_code=400, detail="Platform Admin can only invite CRO Admins")
+            org_id = req.org_id
+        else:
+            org_id = request.state.org_id
+            
+        user_id = getattr(request.state, "user_id", None)
         
-    token = str(uuid.uuid4())
-    expires_at = datetime.now(timezone.utc) + timedelta(hours=int(os.getenv("INVITE_EXPIRY_HOURS", "72")))
-    
-    invite = Invitation(
-        org_id=org_id,
-        invited_email=req.email,
-        role=req.role,
-        token=token,
-        invited_by=user_id,
-        expires_at=expires_at
-    )
-    db.add(invite)
-    db.commit()
-    
-    log_event(db, "INVITATION_SENT", f"Invited {req.email} with role {req.role} to org {org_id}", org_id=org_id, actor_id=user_id)
-    
-    invite_link = f"{os.getenv('INVITE_BASE_URL')}/accept-invite?token={token}"
-    
-    # Get the real org name for the email
-    org = db.query(Organisation).filter(Organisation.id == org_id).first()
-    org_name = org.name if org else "Vritas RBQM"
-    
-    send_invite_email(req.email, invite_link, req.role, org_name)
+        existing_user = db.query(User).filter(User.email == req.email).first()
+        if existing_user:
+            raise HTTPException(status_code=400, detail="User already exists")
+            
+        token = str(uuid.uuid4())
+        # Safe integer parsing for expiry
+        try:
+            expiry_hours = int(os.getenv("INVITE_EXPIRY_HOURS", "72"))
+        except:
+            expiry_hours = 72
+            
+        expires_at = datetime.now(timezone.utc) + timedelta(hours=expiry_hours)
         
-    return {"message": "Invitation sent", "invite_id": invite.id}
+        invite = Invitation(
+            org_id=org_id,
+            invited_email=req.email,
+            role=req.role,
+            token=token,
+            invited_by=user_id,
+            expires_at=expires_at
+        )
+        db.add(invite)
+        db.commit()
+        
+        log_event(db, "INVITATION_SENT", f"Invited {req.email} to org {org_id}", org_id=org_id, actor_id=user_id)
+        
+        invite_link = f"{os.getenv('INVITE_BASE_URL')}/accept-invite?token={token}"
+        org = db.query(Organisation).filter(Organisation.id == org_id).first()
+        org_name = org.name if org else "Vritas RBQM"
+        
+        send_invite_email(req.email, invite_link, req.role, org_name)
+            
+        return {"message": "Invitation sent", "invite_id": invite.id}
+    except Exception as e:
+        import traceback
+        print(f"CRITICAL INVITATION ERROR: {str(e)}")
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 @router.get("/users")
 def get_users(request: Request, db: Session = Depends(get_db)):
