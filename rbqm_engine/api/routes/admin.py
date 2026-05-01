@@ -92,10 +92,13 @@ def invite_user(request: Request, req: InviteUserRequest, db: Session = Depends(
         org_name = org.name if org else "Vritas RBQM"
         
         email_res = send_invite_email(req.email, invite_link, req.role, org_name)
-        if email_res is None:
-            raise HTTPException(status_code=500, detail="Failed to send invitation email. Please check your Resend API key and Sending Domain.")
-            
-        return {"message": "Invitation sent", "invite_id": invite.id}
+        
+        return {
+            "message": "Invitation created", 
+            "invite_id": invite.id,
+            "invite_link": invite_link,
+            "email_status": "sent" if email_res else "pending (manual share required)"
+        }
     except Exception as e:
         import traceback
         print(f"CRITICAL INVITATION ERROR: {str(e)}")

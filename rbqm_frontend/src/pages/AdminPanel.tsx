@@ -123,6 +123,7 @@ export function AdminPanel() {
 function UserManagement({ orgs }: { orgs: any[] }) {
   const { user } = useAuth();
   const [showInvite, setShowInvite] = useState(false);
+  const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [inviteData, setInviteData] = useState({ email: '', role: 'cro_admin', org_id: '' });
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -157,8 +158,13 @@ function UserManagement({ orgs }: { orgs: any[] }) {
         })
       });
       if (res.ok) {
-        alert('Invitation sent successfully!');
-        setShowInvite(false);
+        const data = await res.json();
+        if (data.invite_link) {
+          setInviteLink(data.invite_link);
+        } else {
+          alert('Invitation sent successfully!');
+          setShowInvite(false);
+        }
         fetchUsers();
       } else {
         const err = await res.json();
@@ -194,6 +200,39 @@ function UserManagement({ orgs }: { orgs: any[] }) {
           Invite New User
         </button>
       </div>
+
+      {inviteLink && (
+        <div className="bg-emerald-500/10 border border-emerald-500/50 p-6 rounded-xl mb-6 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <h3 className="text-emerald-400 font-bold text-sm mb-2 flex items-center gap-2">
+                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                Invitation Created Successfully
+              </h3>
+              <p className="text-slate-300 text-xs mb-4">
+                Since automated email delivery might be restricted, please copy and share this link manually with the recipient:
+              </p>
+              <div className="flex gap-2">
+                <input 
+                  readOnly 
+                  value={inviteLink}
+                  className="flex-1 bg-slate-800 border border-emerald-500/30 rounded px-3 py-2 text-xs font-mono text-emerald-300"
+                />
+                <button 
+                  onClick={() => {
+                    navigator.clipboard.writeText(inviteLink);
+                    alert('Link copied to clipboard!');
+                  }}
+                  className="bg-emerald-600 text-white px-4 py-2 rounded text-xs font-bold hover:bg-emerald-500 transition-colors"
+                >
+                  Copy Link
+                </button>
+              </div>
+            </div>
+            <button onClick={() => { setInviteLink(null); setShowInvite(false); }} className="text-slate-500 hover:text-white transition-colors ml-4">✕</button>
+          </div>
+        </div>
+      )}
 
       {showInvite && (
         <div className="bg-slate-900/50 border border-emerald-500/30 p-6 rounded-xl mb-6">

@@ -2,7 +2,7 @@ import os
 import resend
 
 resend.api_key = os.getenv("RESEND_API_KEY")
-SENDING_DOMAIN = os.getenv("SENDING_DOMAIN", "vritas.com")
+SENDING_DOMAIN = os.getenv("SENDING_DOMAIN", "resend.dev")
 
 def send_invite_email(to_email: str, invite_link: str, role: str, org_name: str):
     try:
