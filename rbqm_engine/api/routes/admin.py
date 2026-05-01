@@ -73,7 +73,10 @@ def invite_user(request: Request, req: InviteUserRequest, db: Session = Depends(
     log_event(db, "INVITATION_SENT", f"Invited {req.email} with role {req.role} to org {org_id}", org_id=org_id, actor_id=user_id)
     
     invite_link = f"{os.getenv('INVITE_BASE_URL')}/accept-invite?token={token}"
-    org_name = request.state.org_name if hasattr(request.state, "org_name") else "Our Organisation"
+    
+    # Get the real org name for the email
+    org = db.query(Organisation).filter(Organisation.id == org_id).first()
+    org_name = org.name if org else "Vritas RBQM"
     
     send_invite_email(req.email, invite_link, req.role, org_name)
         
@@ -81,8 +84,24 @@ def invite_user(request: Request, req: InviteUserRequest, db: Session = Depends(
 
 @router.get("/users")
 def get_users(request: Request, db: Session = Depends(get_db)):
-    users = db.query(User).filter(User.org_id == request.state.org_id).all()
-    return [{"id": u.id, "email": u.email, "full_name": u.full_name, "role": u.role, "is_active": u.is_active, "last_login": u.last_login} for u in users]
+    role = getattr(request.state, "role", None)
+    if role == "platform_admin":
+        users = db.query(User).all()
+    else:
+        users = db.query(User).filter(User.org_id == request.state.org_id).all()
+    
+    return [
+        {
+            "id": u.id, 
+            "email": u.email, 
+            "full_name": u.full_name, 
+            "role": u.role, 
+            "is_active": u.is_active, 
+            "last_login": u.last_login,
+            "org_name": u.organisation.name if u.organisation else "N/A"
+        } 
+        for u in users
+    ]
 
 @router.put("/users/{user_id}")
 def update_user(request: Request, user_id: int, req: UpdateUserRoleRequest, db: Session = Depends(get_db)):
