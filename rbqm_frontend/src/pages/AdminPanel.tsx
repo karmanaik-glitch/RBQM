@@ -156,19 +156,17 @@ function UserManagement({ orgs }: { orgs: any[] }) {
         body: JSON.stringify({
           email: inviteData.email,
           role: inviteData.role,
-          org_id: user?.role === 'platform_admin' ? parseInt(inviteData.org_id) : undefined
+          org_id: (user?.role === 'platform_admin' && inviteData.org_id) ? parseInt(inviteData.org_id) : undefined
         })
       });
       if (res.ok) {
         alert('Invitation sent successfully!');
         setShowInvite(false);
+        fetchUsers();
       } else {
         const err = await res.json();
         alert(err.detail || 'Failed to send invitation');
       }
-    } catch (e) { alert('Connection error'); }
-  };
-
     } catch (e) { alert('Connection error'); }
   };
 
@@ -245,7 +243,13 @@ function UserManagement({ orgs }: { orgs: any[] }) {
               </div>
             )}
             <div className="flex gap-2">
-              <button type="submit" className="flex-1 bg-emerald-600 text-white p-2 rounded text-sm font-bold uppercase tracking-widest hover:bg-emerald-500">Send Invite</button>
+              <button 
+                type="submit" 
+                disabled={user?.role === 'platform_admin' && !inviteData.org_id}
+                className="flex-1 bg-emerald-600 text-white p-2 rounded text-sm font-bold uppercase tracking-widest hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Send Invite
+              </button>
               <button type="button" onClick={() => setShowInvite(false)} className="px-4 bg-slate-700 text-slate-300 rounded text-sm hover:bg-slate-600">Cancel</button>
             </div>
           </form>
