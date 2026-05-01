@@ -26,6 +26,7 @@ class TrialCreate(BaseModel):
     sponsor_name: str
     target_lock_date: datetime
     sites: List[SiteCreate]
+    org_id: Optional[int] = None
 
 @router.post("", dependencies=[Depends(require_cro_admin)])
 def create_trial(request: Request, req: TrialCreate, db: Session = Depends(get_db)):
@@ -33,6 +34,14 @@ def create_trial(request: Request, req: TrialCreate, db: Session = Depends(get_d
     if trial:
         raise HTTPException(status_code=400, detail="Trial already exists")
     
+    role = getattr(request.state, "role", None)
+    if role == "platform_admin":
+        if not req.org_id:
+            raise HTTPException(status_code=400, detail="Platform Admin must specify org_id for trials")
+        org_id = req.org_id
+    else:
+        org_id = request.state.org_id
+        
     new_trial = Trial(
         trial_id=req.trial_id,
         title=req.title,
@@ -41,7 +50,7 @@ def create_trial(request: Request, req: TrialCreate, db: Session = Depends(get_d
         indication=req.indication,
         sponsor_name=req.sponsor_name,
         target_lock_date=req.target_lock_date,
-        org_id=request.state.org_id
+        org_id=org_id
     )
     db.add(new_trial)
     db.commit()

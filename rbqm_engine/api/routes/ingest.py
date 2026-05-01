@@ -85,8 +85,12 @@ def run_kri(id: int, request: Request, db: Session = Depends(get_db)):
         }
         site_ids = data["sites"]["site_id"].unique()
         results = []
-        org_id = request.state.org_id
-        overrides = _get_threshold_overrides(id, org_id, db) if org_id else {}
+        
+        # Identify org_id for thresholds
+        role = getattr(request.state, "role", None)
+        org_id = request.state.org_id if role != "platform_admin" else t.org_id
+        
+        overrides = _get_threshold_overrides(id, org_id, db)
         for sid in site_ids:
             kris = calculate_all_kris(data, sid, overrides)
             site_name = data["sites"].loc[data["sites"]["site_id"] == sid, "site_name"].values[0]

@@ -186,11 +186,15 @@ def assign_site(request: Request, site_id: int, req: AssignMonitorRequest, db: S
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
         
+    role = getattr(request.state, "role", None)
+    user_id = getattr(request.state, "user_id", None)
+    
     assignment = UserSiteAssignment(
         user_id=user.id,
         site_id=site.id,
         study_id=site.trial_id,
-        assigned_by=request.state.user_id
+        assigned_by=user_id if role != "platform_admin" else None,
+        platform_admin_id=user_id if role == "platform_admin" else None
     )
     db.add(assignment)
     db.commit()
@@ -233,6 +237,9 @@ def get_kri_library(request: Request, db: Session = Depends(get_db)):
 
 @router.post("/kri-library")
 def add_kri_library(request: Request, req: KRILibraryItemRequest, db: Session = Depends(get_db)):
+    role = getattr(request.state, "role", None)
+    user_id = getattr(request.state, "user_id", None)
+    
     item = KRILibrary(
         org_id=request.state.org_id,
         kri_id=req.kri_id,
@@ -241,7 +248,8 @@ def add_kri_library(request: Request, req: KRILibraryItemRequest, db: Session = 
         default_yellow=req.default_yellow,
         default_red=req.default_red,
         higher_is_worse=req.higher_is_worse,
-        created_by=request.state.user_id
+        created_by=user_id if role != "platform_admin" else None,
+        platform_admin_id=user_id if role == "platform_admin" else None
     )
     db.add(item)
     db.commit()
@@ -262,11 +270,15 @@ def add_study_team(request: Request, study_id: int, req: StudyTeamAssignRequest,
     if not trial:
         raise HTTPException(status_code=404, detail="Study not found")
         
+    role = getattr(request.state, "role", None)
+    user_id = getattr(request.state, "user_id", None)
+    
     member = StudyTeamMember(
         study_id=study_id,
         user_id=req.user_id,
         role_override=req.role_override,
-        assigned_by=request.state.user_id
+        assigned_by=user_id if role != "platform_admin" else None,
+        platform_admin_id=user_id if role == "platform_admin" else None
     )
     db.add(member)
     db.commit()

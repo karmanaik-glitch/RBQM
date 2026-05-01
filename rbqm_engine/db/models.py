@@ -15,9 +15,9 @@ class Organisation(Base):
     created_by_platform_admin = Column(Boolean, default=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
-    users = relationship("User", back_populates="organisation")
-    trials = relationship("Trial", back_populates="organisation")
-    kri_library = relationship("KRILibrary", back_populates="organisation")
+    users = relationship("User", back_populates="organisation", cascade="all, delete-orphan")
+    trials = relationship("Trial", back_populates="organisation", cascade="all, delete-orphan")
+    kri_library = relationship("KRILibrary", back_populates="organisation", cascade="all, delete-orphan")
 
 class User(Base):
     __tablename__ = "users"
@@ -136,8 +136,8 @@ class UserSiteAssignment(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     site_id = Column(Integer, ForeignKey("sites.id", ondelete="CASCADE"), nullable=False)
-    study_id = Column(Integer, ForeignKey("trials.id", ondelete="CASCADE"), nullable=False)
     assigned_by = Column(Integer, ForeignKey("users.id"))
+    platform_admin_id = Column(Integer, ForeignKey("platform_admins.id"))
     assigned_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     is_active = Column(Boolean, default=True)
 
@@ -157,6 +157,7 @@ class KRILibrary(Base):
     higher_is_worse = Column(Boolean, default=True)
     is_active = Column(Boolean, default=True)
     created_by = Column(Integer, ForeignKey("users.id"))
+    platform_admin_id = Column(Integer, ForeignKey("platform_admins.id"))
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     organisation = relationship("Organisation", back_populates="kri_library")
@@ -170,6 +171,7 @@ class StudyKRIConfig(Base):
     red_threshold = Column(Float)
     is_active = Column(Boolean, default=True)
     set_by = Column(Integer, ForeignKey("users.id"))
+    platform_admin_id = Column(Integer, ForeignKey("platform_admins.id"))
     set_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     trial = relationship("Trial", back_populates="study_kri_config")
@@ -273,6 +275,7 @@ class StudyTeamMember(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     role_override = Column(String(50))
     assigned_by = Column(Integer, ForeignKey("users.id"))
+    platform_admin_id = Column(Integer, ForeignKey("platform_admins.id"))
     assigned_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     is_active = Column(Boolean, default=True)
 
